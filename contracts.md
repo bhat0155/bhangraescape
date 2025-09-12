@@ -1,26 +1,26 @@
 # Contract
-## 1 API Contracts for Event Management
+## 1. API Contracts for Event Management
 
 ## Overview
 This document describes how Members and Admins can interact with events in the BhangraEscape system. It covers two main features:
-1. Marking interest in performing at an event (Yes/No)
+1. Marking interest in performing at an event (Yes/No)  
 2. Setting availability for practice days (selecting weekdays)
 
 ### User Types and Permissions
-- **Members/Admins**: Can mark interest and set availability for future events
-- **Guests**: Can only view event details and cannot make changes
+- **Members/Admins**: Can mark interest and set availability for future events  
+- **Guests**: Can only view event details and cannot make changes  
 
 ## Data Structures
 
 ### Event Object
 ```json
 {
-  "id": "evt_123",                 // Unique event identifier
-  "title": "Diwali Night",         // Name of the event
-  "location": "Community Hall",     // Where the event takes place
-  "date": "2025-10-18T19:00:00Z",  // When the event happens
-  
-  "performers": [                   // List of people interested in performing
+  "id": "evt_123",
+  "title": "Diwali Night",
+  "location": "Community Hall",
+  "date": "2025-10-18T19:00:00Z",
+
+  "performers": [
     {
       "userId": "u1",
       "name": "Aisha",
@@ -29,24 +29,58 @@ This document describes how Members and Admins can interact with events in the B
     }
   ],
 
-  "tallies": {                     // Count of people available each day
-    "MON": 0, "TUE": 0, "WED": 0, 
+  "tallies": {
+    "MON": 0, "TUE": 0, "WED": 0,
     "THU": 0, "FRI": 0, "SAT": 0, "SUN": 1
   },
 
-  "topDays": [                     // Days with most people available
+  "topDays": [
     { "weekday": "SUN", "count": 1 }
   ],
 
-  "capabilities": {                 // What the current user can do
+  "playlist": [
+    {
+      "id": "pl_1",
+      "provider": "SPOTIFY",
+      "title": "Sadi Gali",
+      "artist": "Lehmber Hussainpuri",
+      "url": "https://open.spotify.com/track/..."
+    }
+  ],
+
+  "media": [
+    {
+      "id": "m_1",
+      "type": "IMAGE",
+      "source": "S3",
+      "url": "https://instagram.com/p/abcd...",
+      "thumbUrl": "https://cdn.example.com/evt_123/abcd_thumb.jpg",
+      "title": "Backstage",
+      "createdAt": "2025-09-12T15:01:00Z"
+    }
+  ],
+
+  "finalPlaylist": null,
+
+  "capabilities": {
     "canSetInterest": true,
     "canSetAvailability": true
   },
 
-  "interested": false,             // If current user wants to perform
-  "myDays": ["SUN","MON"]         // Current user's available days
+  "interested": false,
+  "myDays": ["SUN", "MON"]
 }
 ```
+
+#### Weekday Enum
+Allowed values: `"MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT" | "SUN"`
+
+#### Provider Rules
+- `playlist[*].provider` ∈ {"SPOTIFY","YOUTUBE","EXTERNAL"}  
+- `media[*].type` ∈ {"IMAGE","VIDEO"}  
+- `media[*].source` ∈ {"S3","YOUTUBE","INSTAGRAM","DRIVE"}  
+
+---
 
 ## API Endpoints
 
@@ -135,14 +169,20 @@ Set which days you're available for practice.
 ```
 
 **Possible Errors**:
-- 400: Invalid days selected
-- 401: Not logged in
-- 403: Not allowed to update
-- 404: Event not found
+- 400: Invalid days selected  
+- 401: Not logged in  
+- 403: Not allowed to update  
+- 404: Event not found  
+
+---
 
 ## Important Notes
-- Guests can only view information, not make changes
-- Changes only work for future events
-- Days are represented as: "MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"
-- When no one has set availability yet, all day counts start at zero
-- The system always shows the top 2 most
+- Guests can only view information, not make changes.  
+- Changes only work for future events.  
+- When no one has set availability yet, all day counts start at zero.  
+- The system always shows the **top 2** most available days (tie-break: weekday order MON→SUN).  
+- `playlist`, `media`, and `finalPlaylist` are read-only for non-admins and may be empty.  
+- `finalPlaylist` is `null` when unset.  
+- `performers`, `tallies`, `topDays`, `capabilities`, `interested`, and `myDays` are computed/derived (not client-set).  
+- For guests, `interested` and `myDays` are omitted in responses.  
+"""
