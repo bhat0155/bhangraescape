@@ -1,66 +1,26 @@
-## Contracts
+# Contract
+## 1 API Contracts for Event Management
 
+## Overview
+This document describes how Members and Admins can interact with events in the BhangraEscape system. It covers two main features:
+1. Marking interest in performing at an event (Yes/No)
+2. Setting availability for practice days (selecting weekdays)
 
-# 1
-Use Case: Member/Admin can set Interest (toggle) and Availability for an Event
+### User Types and Permissions
+- **Members/Admins**: Can mark interest and set availability for future events
+- **Guests**: Can only view event details and cannot make changes
 
-Overview
+## Data Structures
 
-This contract defines the endpoints, request/response formats, and rules enabling authenticated Members and Admins to:
-
-Set their Interest (Interested in performing: yes/no).
-
-Mark Availability by selecting weekdays.
-
-Guests have read-only access (event details, performers, tallies, top days) and see a Join Team CTA.
-
-Entities
-Event (Response Shape)
-Field	Type	Notes
-id	string	Unique identifier.
-title	string	Event name/title.
-location	string	Venue or place.
-date	ISO8601 datetime	Scheduled date/time.
-performers[]	array of UserPublic	Derived: users with interested = true for this event.
-tallies	object {Weekday:int}	Vote counts per weekday, computed at runtime.
-topDays[]	array {weekday,count}	Top two weekdays by count (may be empty initially).
-capabilities	object	Runtime booleans: { canSetInterest, canSetAvailability }.
-interested	boolean (optional)	Current user’s interest; omitted for guests.
-myDays[]	array of Weekday (opt)	Current user’s availability; omitted for guests.
-UserPublic
-Field	Type	Notes
-userId	string	Unique user id.
-name	string	Display name.
-avatarUrl	string	Profile image URL.
-description	string	Short bio/role text shown on avatar/profile.
-Weekday
-
-"MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT" | "SUN"
-
-Capabilities (Runtime Rules)
-
-canSetInterest = true if user role ∈ {MEMBER, ADMIN} and event date is in the future.
-
-canSetAvailability = true if user role ∈ {MEMBER, ADMIN} and event date is in the future.
-
-Guests: both are false.
-
-These flags are computed per request; never stored in the database.
-
-Endpoints
-1) Get Event Detail
-
-GET /api/events/:eventId
-
-200 OK
-
+### Event Object
+```json
 {
-  "id": "evt_123",
-  "title": "Diwali Night",
-  "location": "Community Hall",
-  "date": "2025-10-18T19:00:00Z",
-
-  "performers": [
+  "id": "evt_123",                 // Unique event identifier
+  "title": "Diwali Night",         // Name of the event
+  "location": "Community Hall",     // Where the event takes place
+  "date": "2025-10-18T19:00:00Z",  // When the event happens
+  
+  "performers": [                   // List of people interested in performing
     {
       "userId": "u1",
       "name": "Aisha",
@@ -69,130 +29,120 @@ GET /api/events/:eventId
     }
   ],
 
-  "tallies": { "MON": 0, "TUE": 0, "WED": 0, "THU": 0, "FRI": 0, "SAT": 0, "SUN": 1 },
+  "tallies": {                     // Count of people available each day
+    "MON": 0, "TUE": 0, "WED": 0, 
+    "THU": 0, "FRI": 0, "SAT": 0, "SUN": 1
+  },
 
-  "topDays": [
+  "topDays": [                     // Days with most people available
     { "weekday": "SUN", "count": 1 }
   ],
 
-  "capabilities": { "canSetInterest": true, "canSetAvailability": true },
+  "capabilities": {                 // What the current user can do
+    "canSetInterest": true,
+    "canSetAvailability": true
+  },
 
-  "interested": false,         // omit for guests
-  "myDays": ["SUN","MON"]      // omit for guests
+  "interested": false,             // If current user wants to perform
+  "myDays": ["SUN","MON"]         // Current user's available days
 }
+```
 
+## API Endpoints
 
-Errors
+### 1. Get Event Details
+```http
+GET /api/events/:eventId
+```
+Returns all information about an event, including performers and availability.
 
-404 Event not found
+**Possible Errors**:
+- 404: Event not found
 
-Rules
-
-performers, tallies, topDays are derived on read.
-
-Capabilities are computed from role + future date.
-
-2) Set Interest (toggle)
-
+### 2. Mark Interest in Performing
+```http
 POST /api/events/:eventId/interest
+```
+Tell the system if you want to perform at this event.
 
-Request
-
+**Request Body**:
+```json
 { "interested": true }
+```
 
+**Response**:
+```json
+{ 
+  "interested": true, 
+  "performerCount": 5 
+}
+```
 
-200 OK
+**Possible Errors**:
+- 401: Not logged in
+- 403: Not allowed (guests or past events)
+- 404: Event not found
 
-{ "interested": true, "performerCount": 5 }
-
-
-Errors
-
-401 Unauthorized (not logged in)
-
-403 Forbidden (guest or past event)
-
-404 Event not found
-
-Rules
-
-Idempotent (posting same state returns 200 with no change).
-
-Server updates the user’s per-event interested flag; performers[] reflects on next GET.
-
-Frontend Notes
-
-Optimistic UI is fine; reconcile with response or quick refetch.
-
-3) Get Availability
-
+### 3. Get Availability Information
+```http
 GET /api/events/:eventId/availability
+```
+See which days people are available and your selected days.
 
-200 OK
-
+**Response**:
+```json
 {
   "eventId": "evt_123",
-  "myDays": ["SUN","MON"],     // omitted for guests
-  "tallies": { "MON": 1, "TUE": 0, "WED": 0, "THU": 0, "FRI": 0, "SAT": 0, "SUN": 1 },
+  "myDays": ["SUN","MON"],
+  "tallies": { 
+    "MON": 1, "TUE": 0, "WED": 0,
+    "THU": 0, "FRI": 0, "SAT": 0, "SUN": 1 
+  },
   "topDays": [
     { "weekday": "SUN", "count": 1 },
     { "weekday": "MON", "count": 1 }
   ],
-  "capabilities": { "canSetAvailability": true }
+  "capabilities": { 
+    "canSetAvailability": true 
+  }
 }
+```
 
-
-Errors
-
-404 Event not found
-
-Rules
-
-topDays = two weekdays with highest counts (tie-break by weekday order MON..SUN).
-
-Guests: myDays omitted and canSetAvailability=false.
-
-4) Update Availability (replace selection)
-
+### 4. Update Your Availability
+```http
 POST /api/events/:eventId/availability
+```
+Set which days you're available for practice.
 
-Request
+**Request Body**:
+```json
+{ "days": ["SUN", "MON"] }
+```
 
-{ "days": ["SUN","MON"] }
-
-
-200 OK
-
+**Response**:
+```json
 {
   "myDays": ["SUN","MON"],
-  "tallies": { "MON": 1, "TUE": 0, "WED": 0, "THU": 0, "FRI": 0, "SAT": 0, "SUN": 1 },
+  "tallies": { 
+    "MON": 1, "TUE": 0, "WED": 0,
+    "THU": 0, "FRI": 0, "SAT": 0, "SUN": 1 
+  },
   "topDays": [
     { "weekday": "SUN", "count": 1 },
     { "weekday": "MON", "count": 1 }
   ]
 }
+```
 
+**Possible Errors**:
+- 400: Invalid days selected
+- 401: Not logged in
+- 403: Not allowed to update
+- 404: Event not found
 
-Errors
-
-400 Invalid weekday or duplicate values
-
-401 Unauthorized
-
-403 Forbidden (guest or past event)
-
-404 Event not found
-
-Rules
-
-Idempotent for identical sets.
-
-Server recalculates tallies and topDays on each update.
-
-Initial/Empty States
-
-performers: [] when no one is interested.
-
-topDays: [] and tallies with all zeros when no availability is set.
-
-interested/myDays omitted for guests.
+## Important Notes
+- Guests can only view information, not make changes
+- Changes only work for future events
+- Days are represented as: "MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"
+- When no one has set availability yet, all day counts start at zero
+- The system always shows the top 2 most
