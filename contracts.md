@@ -186,3 +186,130 @@ Set which days you're available for practice.
 - `performers`, `tallies`, `topDays`, `capabilities`, `interested`, and `myDays` are computed/derived (not client-set).  
 - For guests, `interested` and `myDays` are omitted in responses.  
 """
+
+## Scenario 2 — Admin CRUD for Events
+
+### Overview
+Admins can create, update, and delete events. The **create** form collects only **core event fields**:
+- `title`
+- `location`
+- `date` (ISO 8601)
+
+All other event fields are **added later** via their own flows:
+- `playlist[]` (songs)
+- `media[]` (images/videos)
+- `finalPlaylist` (final mix link)
+- `performers[]` (derived from member interest toggles; not admin-edited)
+
+---
+
+### Endpoints (Admin-only)
+
+#### Create Event
+```http
+POST /api/events
+```
+**Request**
+```json
+{
+  "title": "Diwali Night",
+  "location": "Community Hall",
+  "date": "2025-10-18T19:00:00Z"
+}
+```
+**Response 201**
+```json
+{
+  "id": "evt_123",
+  "title": "Diwali Night",
+  "location": "Community Hall",
+  "date": "2025-10-18T19:00:00Z",
+  "performers": [],
+  "tallies": { "MON": 0, "TUE": 0, "WED": 0, "THU": 0, "FRI": 0, "SAT": 0, "SUN": 0 },
+  "topDays": [],
+  "playlist": [],
+  "media": [],
+  "finalPlaylist": null
+}
+```
+**Errors**
+- `401` Unauthorized (not logged in)
+- `403` Forbidden (not admin)
+- `422` Validation error (missing/invalid title, location, date)
+
+**Notes**
+- `id` is server-generated (client must not send it).
+- Optional fields (e.g., `coverUrl`, `description`) can be added later via update.
+
+---
+
+#### Update Event
+```http
+PATCH /api/events/:eventId
+```
+**Request** (partial allowed)
+```json
+{
+  "title": "Diwali Night 2025",
+  "location": "Grand Hall",
+  "date": "2025-10-19T19:00:00Z"
+}
+```
+**Response 200**
+```json
+{
+  "id": "evt_123",
+  "title": "Diwali Night 2025",
+  "location": "Grand Hall",
+  "date": "2025-10-19T19:00:00Z"
+}
+```
+**Errors**
+- `401` Unauthorized
+- `403` Forbidden (not admin)
+- `404` Event not found
+- `422` Validation error
+
+**Notes**
+- Updating `date` will affect runtime capabilities (`canSetInterest`, `canSetAvailability`) on reads.
+
+---
+
+#### Delete Event
+```http
+DELETE /api/events/:eventId
+```
+**Response 204** (no content)
+
+**Errors**
+- `401` Unauthorized
+- `403` Forbidden (not admin)
+- `404` Event not found
+
+**Notes**
+- Consider soft-delete if you want to keep historical media/links visible.
+
+---
+
+### Form → API Mapping (Create)
+| Form Field | JSON Field | Required | Validation |
+|------------|------------|----------|------------|
+| Event name | `title`    | Yes      | non-empty, max ~120 chars |
+| Location   | `location` | Yes      | non-empty, max ~160 chars |
+| Date & time| `date`     | Yes      | ISO 8601 string; timezone-consistent |
+
+---
+
+### Acceptance Criteria
+- **Given** I am an Admin, **when** I click **+ Create Event**, **then** I see a form for `title`, `location`, `date`.
+- **When** I submit valid data, **then** an event is created and I’m redirected to the event detail or list view.
+- **Given** I am not an Admin, **when** I call create/update/delete APIs, **then** I receive **403 Forbidden**.
+- **Given** a new event, **then** `performers`, `playlist`, `media`, `finalPlaylist`, `tallies`, and `topDays` are empty/initial defaults and will be populated by later workflows.
+
+---
+
+### Out of Scope (handled by other endpoints)
+- **Playlist** CRUD → `POST /api/events/:id/playlist`, `PATCH /api/playlist/:playlistItemId`, `DELETE /api/playlist/:playlistItemId`.
+- **Media** uploads/links → `POST /api/events/:id/media/presign`, `POST /api/events/:id/media`, `DELETE /api/media/:mediaId`.
+- **Final mix** link → `PUT /api/events/:id/final-playlist`, `DELETE /api/events/:id/final-playlist`.
+- **Performers** derived from members’ `POST /api/events/:id/interest` (not admin-edited).
