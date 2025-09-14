@@ -313,3 +313,104 @@ DELETE /api/events/:eventId
 - **Media** uploads/links → `POST /api/events/:id/media/presign`, `POST /api/events/:id/media`, `DELETE /api/media/:mediaId`.
 - **Final mix** link → `PUT /api/events/:id/final-playlist`, `DELETE /api/events/:id/final-playlist`.
 - **Performers** derived from members’ `POST /api/events/:id/interest` (not admin-edited).
+
+## Scenario 3 — Join Team (Guest → Member via Admin Approval) — Login Required
+
+### Overview
+A **Guest** can request to join the team. They must be logged in to submit the form.  
+If the user is not logged in, clicking **Join Team** redirects them to the Login/Signup page first.  
+Once logged in as a Guest, they can submit a Join Team form.  
+Admins receive an email notification, review the request, and approve/reject.  
+On approval, the user’s role changes from `GUEST` → `MEMBER`.
+
+---
+
+### Data Structures
+
+#### JoinRequest (response shape)
+```json
+{
+  "id": "jr_123",
+  "userId": "u_789",
+  "name": "Ekam B",
+  "email": "ekam@example.com",
+  "message": "I'd like to join as a dancer.",
+  "status": "PENDING",            // "PENDING" | "APPROVED" | "REJECTED"
+  "createdAt": "2025-09-13T15:01:00Z",
+  "reviewedAt": null
+}
+```
+
+---
+
+### Endpoints
+
+#### Submit Join Request (Guest; must be authenticated)
+```http
+POST /api/join-team
+```
+**Request**
+```json
+{
+  "name": "Ekam B",
+  "email": "ekam@example.com",
+  "message": "I'd like to join as a dancer."
+}
+```
+**Response 201**
+```json
+{ "id": "jr_123", "status": "PENDING" }
+```
+
+**Side effects**
+- Persist JoinRequest linked to the current session’s `userId`.
+- Send notification email to admins containing `name` and `email`.
+
+**Errors**
+- `401` Unauthorized (not logged in) → redirect to login
+- `409` Conflict (already has a PENDING request)
+- `422` Validation error
+
+---
+
+#### List Pending Join Requests (Admin)
+```http
+GET /api/join-requests?status=PENDING
+```
+
+---
+
+#### Review Join Request (Approve/Reject) — Admin
+```http
+PATCH /api/join-requests/:joinRequestId
+```
+- **APPROVE** → `user.role = MEMBER`, notify user.
+- **REJECT** → request marked rejected, user can submit a new one later.
+
+---
+
+### UI Flow
+1. **Anonymous visitor (not logged in)**  
+   - Clicks **Join Team** → redirected to **Login/Signup** → on success, redirected back to Join Team form.
+
+2. **Logged-in Guest (role = GUEST)**  
+   - Clicks **Join Team** → taken to Join Team form → submits → request saved + email sent to admins.
+
+3. **Logged-in Member/Admin**  
+   - The **Join Team** button is **hidden** (not shown).
+
+4. **While status = PENDING**  
+   - Frontend shows: *“Join team request already sent.”*  
+   - If status changes to APPROVED/REJECTED → message disappears.
+
+---
+
+### Acceptance Criteria
+- Only logged-in Guests can access the Join Team form.  
+- Non-logged in visitors clicking **Join Team** are redirected to Login/Signup first.  
+- Members/Admins do not see the Join Team button at all.  
+- Guests can only have one active PENDING request.  
+- An email with `name` and `email` is sent to admins on submission.  
+- Users with a **PENDING** request see “Join team request already sent.”  
+- Approving a request sets `user.role = MEMBER`.  
+- Rejected users can reapply by submitting a new request.
