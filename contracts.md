@@ -414,3 +414,113 @@ PATCH /api/join-requests/:joinRequestId
 - Users with a **PENDING** request see “Join team request already sent.”  
 - Approving a request sets `user.role = MEMBER`.  
 - Rejected users can reapply by submitting a new request.
+
+## Scenario 4 — Members Directory (Public) + Admin CRUD
+
+### Overview
+Anyone can view the **Members** list and individual **Member** profiles.  
+Admins can **create, update, and delete** members from the Member Detail page (via + and ✏️ icons).  
+Every member must have an **avatar image**.
+
+---
+
+### Data Structures
+
+#### MemberPublic
+```json
+{
+  "id": "u_123",
+  "name": "Aisha",
+  "avatarUrl": "https://cdn.example.com/avatars/u_123.jpg",
+  "description": "Lead dancer with 5 years of experience",
+  "role": "MEMBER"
+}
+```
+
+---
+
+### Endpoints
+
+#### List Members (public)
+```http
+GET /api/members
+```
+
+#### Get Member Detail (public)
+```http
+GET /api/members/:memberId
+```
+
+---
+
+### Admin CRUD
+
+#### Create Member (Admin)
+```http
+POST /api/members
+```
+**Request**
+```json
+{
+  "name": "Aisha",
+  "avatarUrl": "https://cdn.example.com/avatars/u_123.jpg",
+  "description": "Lead dancer with 5 years of experience"
+}
+```
+**Response 201**
+```json
+{
+  "id": "u_123",
+  "name": "Aisha",
+  "avatarUrl": "https://cdn.example.com/avatars/u_123.jpg",
+  "description": "Lead dancer with 5 years of experience",
+  "role": "MEMBER"
+}
+```
+
+---
+
+#### Update Member (Admin)
+```http
+PATCH /api/members/:memberId
+```
+**Request (partial allowed)**
+```json
+{
+  "name": "Aisha K.",
+  "description": "Lead dancer & choreography mentor",
+  "avatarUrl": "https://cdn.example.com/avatars/u_123_new.jpg"
+}
+```
+
+---
+
+#### Delete Member (Admin)
+```http
+DELETE /api/members/:memberId
+```
+
+---
+
+### Avatar Upload (Admin) — S3 Presign Pattern
+1. **Presign request**  
+   `POST /api/members/:memberId/avatar/presign` → `{ uploadUrl, publicUrl }`
+2. **Upload to S3 directly**
+3. **Register avatar URL**  
+   `POST /api/members/:memberId/avatar` with `{ avatarUrl }` (required)
+
+---
+
+### Validation Rules
+- `name`: required, 1–80 chars  
+- `avatarUrl`: **required**, valid https URL, uploaded image must be `jpeg|png|webp`  
+- `description`: optional, up to 300 chars  
+
+---
+
+### Acceptance Criteria
+- Everyone can view Members list and details.  
+- `avatarUrl` is mandatory for every member (at create and update).  
+- Admin-only controls (+, edit, delete, change avatar) are hidden for non-admins and blocked by API.  
+- Creating/updating a member without `avatarUrl` returns **422 Validation Error**.  
+- Deleted members disappear from `GET /api/members`.  
