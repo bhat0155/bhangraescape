@@ -524,3 +524,93 @@ DELETE /api/members/:memberId
 - Admin-only controls (+, edit, delete, change avatar) are hidden for non-admins and blocked by API.  
 - Creating/updating a member without `avatarUrl` returns **422 Validation Error**.  
 - Deleted members disappear from `GET /api/members`.  
+
+## Scenario 5 — Contact Us (Public)
+
+### Overview
+Anyone can submit the Contact Us form. The system validates the input, sends the message to admin emails, and shows a confirmation page with a button to return to the homepage.
+
+---
+
+### Data Structures
+
+#### ContactMessage (server-side record; optional to persist)
+```json
+{
+  "id": "cm_123",
+  "name": "Ekam B",
+  "email": "ekam@example.com",
+  "message": "We’d love to collaborate for Diwali Night.",
+  "createdAt": "2025-09-13T15:01:00Z"
+}
+```
+
+---
+
+### Endpoint
+
+#### Submit Contact Message (public)
+```http
+POST /api/contactus
+```
+
+**Request**
+```json
+{
+  "name": "Ekam B",
+  "email": "ekam@example.com",
+  "message": "We’d love to collaborate for Diwali Night."
+}
+```
+
+**Response**
+- **202 Accepted**
+```json
+{ "status": "queued" }
+```
+
+**Side Effects**
+- Validate `name`, `email`, and `message` fields.
+- Persist a `ContactMessage` row for audit/support (optional).
+- Immediately send an email to admin distribution with the provided details.
+
+**Errors**
+- `422` Validation error (missing/invalid `name`, `email`, or `message`).
+- `429` Too Many Requests (rate limit exceeded).
+- `500` Email dispatch failure (message may still be stored).
+
+---
+
+### Validation Rules
+- `name`: required, 1–80 chars.
+- `email`: required, valid email format.
+- `message`: required, 1–2000 chars.
+- Trim whitespace; reject empty-after-trim.
+
+---
+
+### Abuse & Reliability - For phase 2 - latter implementation
+- **Rate limit** by IP and email (e.g., 5 requests / 10 minutes).
+- **Bot protection**: reCAPTCHA or invisible honeypot field.
+- **Email**: send via a transactional provider (SES/SendGrid/Postmark); retry on transient errors.
+- **Logging**: log request ID + email provider response ID for troubleshooting.
+
+---
+
+### UI Flow
+1. User clicks **Contact Us** in navbar → navigates to form page.
+2. User fills **name, email, message** → clicks **Submit**.
+3. Frontend calls `POST /api/contactus`.
+4. On **success** (202), show a **confirmation page**:  
+   “Thanks for contacting us, we will get back to you soon.”  
+   → Display a **Return to Homepage** button.
+5. On **error**, show inline validation or friendly retry message.
+
+---
+
+### Acceptance Criteria
+- `name`, `email`, and `message` fields are validated before submission.
+- Submitting sends an email to admins immediately.
+- On success, the user sees a confirmation page with a **Return to Homepage** button.
+- Invalid submissions return **422** with field-level errors.
+- Excessive submissions return **429**.
