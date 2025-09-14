@@ -682,3 +682,114 @@ GET /api/events
 - **Given** a user selects **Upcoming** or **Past**, **then** the list reloads accordingly.
 - **Given** a user enters a **search query**, **then** the results filter to matching events.
 - **Given** an event card is clicked, **then** the app navigates to the Event Detail page.
+
+## Scenario 7 — Admin: Review Join Requests
+
+### Overview
+Admins see a **Requests** item in the navbar. Clicking it opens a page listing **pending join requests** with **Approve** / **Reject** actions.  
+- **Approve** → user’s role changes from `GUEST` → `MEMBER` (they can now set interest/availability).  
+- **Reject** → request is marked rejected; the user may submit a new request later.
+
+---
+
+### Data Structures
+
+#### JoinRequest (list/detail shape)
+```json
+{
+  "id": "jr_123",
+  "userId": "u_789",
+  "name": "Ekam B",
+  "email": "ekam@example.com",
+  "message": "I'd like to join as a dancer.",
+  "status": "PENDING",            // "PENDING" | "APPROVED" | "REJECTED"
+  "createdAt": "2025-09-13T15:01:00Z",
+  "reviewedAt": null
+}
+```
+
+---
+
+### Endpoints (Admin-only)
+
+#### List Join Requests
+```http
+GET /api/join-requests
+```
+**Query params (optional)**
+- `status=PENDING|APPROVED|REJECTED` (default: `PENDING`)
+- `q` (search by name/email)
+  
+**Response 200**
+```json
+{
+  "items": [
+    {
+      "id": "jr_123",
+      "userId": "u_789",
+      "name": "Ekam B",
+      "email": "ekam@example.com",
+      "message": "I'd like to join as a dancer.",
+      "status": "PENDING",
+      "createdAt": "2025-09-13T15:01:00Z"
+    }
+  ]
+}
+```
+
+**Errors**
+- `401` Unauthorized
+- `403` Forbidden (not admin)
+
+---
+
+#### Review a Join Request (Approve/Reject)
+```http
+PATCH /api/join-requests/:joinRequestId
+```
+**Request (approve)**
+```json
+{ "action": "APPROVE" }
+```
+**Request (reject)**
+```json
+{ "action": "REJECT" }
+```
+
+**Response 200 (approve)**
+```json
+{
+  "id": "jr_123",
+  "status": "APPROVED",
+  "reviewedAt": "2025-09-13T16:10:00Z"
+}
+```
+
+**Side effects**
+- On **APPROVE**: set `user.role = "MEMBER"` for the associated `userId`; (optional) send confirmation email.
+- On **REJECT**: mark request as rejected; user may submit a new request later.
+
+**Errors**
+- `401` Unauthorized
+- `403` Forbidden (not admin)
+- `404` Join request not found
+- `409` Conflict (already reviewed)
+
+---
+
+### UI Behavior
+- Navbar shows **Requests** (admin-only).  
+- Requests page loads **PENDING** by default via `GET /api/join-requests?status=PENDING`.  
+- Each row shows **name, email, message, createdAt** and **Approve / Reject** buttons.  
+- Approve/Reject updates the row inline (optimistic UI allowed).  
+- (Optional) Add tabs or filters: **Pending / Approved / Rejected**.
+
+---
+
+### Acceptance Criteria
+- Only admins can access the Requests page and endpoints.
+- Default view lists **PENDING** requests.
+- Approving a request **promotes** the user to **MEMBER**.
+- Rejecting a request **does not block** the user from applying again later.
+- Users with a **PENDING** request see “Join team request already sent” (Scenario 3).
+"""
