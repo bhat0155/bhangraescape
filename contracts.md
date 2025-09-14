@@ -614,3 +614,71 @@ POST /api/contactus
 - On success, the user sees a confirmation page with a **Return to Homepage** button.
 - Invalid submissions return **422** with field-level errors.
 - Excessive submissions return **429**.
+
+## Scenario 6 — Events Listing (See All Events)
+
+### Overview
+When a user clicks **See All Events** on the homepage, the app navigates to the Events listing page and fetches a list of events. The frontend renders the events as **cards in a grid** with filters for **Upcoming / Past** and a **search field**.
+
+---
+
+### Endpoint (Public)
+
+#### List Events
+```http
+GET /api/events
+```
+
+**Query Parameters (optional)**
+- `status` — filter by time window: `upcoming` | `past` | `all` (default: `all`)
+- `search` — free-text search over `title` and `location`
+
+**Response 200**
+```json
+{
+  "items": [
+    {
+      "id": "evt_123",
+      "title": "Diwali Night",
+      "location": "Community Hall",
+      "date": "2025-10-18T19:00:00Z",
+      "coverUrl": "https://cdn.example.com/events/evt_123/cover.jpg"
+    }
+  ]
+}
+```
+
+**Notes**
+- Listing items are **lightweight** (no `performers`, `tallies`, `playlist`, `media`).
+- The **full event** (with capabilities, performers, tallies, media, etc.) is returned by `GET /api/events/:eventId`.
+
+**Errors**
+- Always `200` with empty `items` when no results.
+- `400` if query params invalid (e.g., bad `status`).
+- `500` on server error.
+
+---
+
+### Card Data (recommended)
+- **Title**
+- **Date** (formatted for locale)
+- **Location**
+- **Cover image** (optional; fallback to placeholder if none)
+
+---
+
+### UI Flow
+1. User clicks **See All Events** → navigate to `/events`.
+2. Frontend calls `GET /api/events` (optionally with `status` or `search`).
+3. Render items as cards in a **responsive grid**.
+4. User can toggle **Upcoming / Past** or enter a **search query** to filter results.
+5. Clicking a card → navigate to Event Detail page (`/events/:eventId`) and call `GET /api/events/:eventId`.
+
+---
+
+### Acceptance Criteria
+- **Given** the Events listing page, **when** the API returns results, **then** events are displayed as cards in a grid.
+- **Given** no events match filters, **then** show an empty state (“No events yet. Check back soon.”).
+- **Given** a user selects **Upcoming** or **Past**, **then** the list reloads accordingly.
+- **Given** a user enters a **search query**, **then** the results filter to matching events.
+- **Given** an event card is clicked, **then** the app navigates to the Event Detail page.
