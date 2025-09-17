@@ -187,132 +187,122 @@ Set which days you're available for practice.
 - For guests, `interested` and `myDays` are omitted in responses.  
 """
 
-## Scenario 2 — Admin CRUD for Events
+# Scenario 1 — Member/Admin Interest & Availability
 
-### Overview
-Admins can create, update, and delete events. The **create** form collects only **core event fields**:
-- `title`
-- `location`
-- `date` (ISO 8601)
-
-All other event fields are **added later** via their own flows:
-- `playlist[]` (songs)
-- `media[]` (images/videos)
-- `finalPlaylist` (final mix link)
-- `performers[]` (derived from member interest toggles; not admin-edited)
+## Overview
+Members and Admins can mark **interest** (Yes/No) and set **practice availability** (weekdays) for **future events only**.  
+Guests are read-only. For **past events**, interest/availability actions are **disabled** and availability endpoints **reject**.
 
 ---
 
-### Endpoints (Admin-only)
-
-#### Create Event
+## Event Detail (read)
 ```http
-POST /api/events
+GET /api/events/:eventId
 ```
-**Request**
-```json
-{
-  "title": "Diwali Night",
-  "location": "Community Hall",
-  "date": "2025-10-18T19:00:00Z"
-}
-```
-**Response 201**
+**Response (shape excerpt)**
 ```json
 {
   "id": "evt_123",
   "title": "Diwali Night",
   "location": "Community Hall",
   "date": "2025-10-18T19:00:00Z",
-  "performers": [],
-  "tallies": { "MON": 0, "TUE": 0, "WED": 0, "THU": 0, "FRI": 0, "SAT": 0, "SUN": 0 },
-  "topDays": [],
+
+  "performers": [{ "userId": "u1", "name": "Aisha", "avatarUrl": "/avatars/u1.jpg", "description": "..." }],
+
+  "tallies": { "MON": 0, "TUE": 0, "WED": 0, "THU": 0, "FRI": 0, "SAT": 0, "SUN": 1 },
+  "topDays": [{ "weekday": "SUN", "count": 1 }],
+
   "playlist": [],
   "media": [],
-  "finalPlaylist": null
+  "finalPlaylist": null,
+
+  "capabilities": {
+    "canSetInterest": true,
+    "canSetAvailability": true
+  },
+
+  "interested": false,
+  "myDays": ["SUN", "MON"]
 }
 ```
-**Errors**
-- `401` Unauthorized (not logged in)
-- `403` Forbidden (not admin)
-- `422` Validation error (missing/invalid title, location, date)
 
 **Notes**
-- `id` is server-generated (client must not send it).
-- Optional fields (e.g., `coverUrl`, `description`) can be added later via update.
+- `performers[]` is **derived** from Interest rows where `interested = true` (includes admin backfills; see Scenario 2).
+- `capabilities` are **computed** (not stored). Typical rules:
+  - `canSetInterest = isMemberOrAdmin && eventIsFuture`
+  - `canSetAvailability = isMemberOrAdmin && eventIsFuture`
+- For **past events**: both capability flags are `false`.
 
 ---
 
-#### Update Event
+## Mark Interest (self-service)
 ```http
-PATCH /api/events/:eventId
+POST /api/events/:eventId/interest
 ```
-**Request** (partial allowed)
+**Body**
 ```json
-{
-  "title": "Diwali Night 2025",
-  "location": "Grand Hall",
-  "date": "2025-10-19T19:00:00Z"
-}
+{ "interested": true }
 ```
-**Response 200**
+**Response**
 ```json
-{
-  "id": "evt_123",
-  "title": "Diwali Night 2025",
-  "location": "Grand Hall",
-  "date": "2025-10-19T19:00:00Z"
-}
+{ "interested": true, "performerCount": 5 }
 ```
 **Errors**
-- `401` Unauthorized
-- `403` Forbidden (not admin)
-- `404` Event not found
-- `422` Validation error
-
-**Notes**
-- Updating `date` will affect runtime capabilities (`canSetInterest`, `canSetAvailability`) on reads.
-
----
-
-#### Delete Event
-```http
-DELETE /api/events/:eventId
-```
-**Response 204** (no content)
-
-**Errors**
-- `401` Unauthorized
-- `403` Forbidden (not admin)
+- `401` Not logged in
+- `403` Not allowed (guest or **EVENT_IN_PAST**)
 - `404` Event not found
 
-**Notes**
-- Consider soft-delete if you want to keep historical media/links visible.
+---
+
+## Get Availability (read)
+```http
+GET /api/events/:eventId/availability
+```
+**Response**
+```json
+{
+  "eventId": "evt_123",
+  "myDays": ["SUN","MON"],
+  "tallies": { "MON": 1, "TUE": 0, "WED": 0, "THU": 0, "FRI": 0, "SAT": 0, "SUN": 1 },
+  "topDays": [{ "weekday": "SUN", "count": 1 }, { "weekday": "MON", "count": 1 }],
+  "capabilities": { "canSetAvailability": true }
+}
+```
+**Errors**
+- `403` **EVENT_IN_PAST**
+- `404` Event not found
 
 ---
 
-### Form → API Mapping (Create)
-| Form Field | JSON Field | Required | Validation |
-|------------|------------|----------|------------|
-| Event name | `title`    | Yes      | non-empty, max ~120 chars |
-| Location   | `location` | Yes      | non-empty, max ~160 chars |
-| Date & time| `date`     | Yes      | ISO 8601 string; timezone-consistent |
+## Update Availability (write)
+```http
+POST /api/events/:eventId/availability
+```
+**Body**
+```json
+{ "days": ["SUN", "MON"] }
+```
+**Response**
+```json
+{
+  "myDays": ["SUN","MON"],
+  "tallies": { "MON": 1, "TUE": 0, "WED": 0, "THU": 0, "FRI": 0, "SAT": 0, "SUN": 1 },
+  "topDays": [{ "weekday": "SUN", "count": 1 }, { "weekday": "MON", "count": 1 }]
+}
+```
+**Errors**
+- `400` Invalid days
+- `401` Not logged in
+- `403` Not allowed (guest or **EVENT_IN_PAST**)
+- `404` Event not found
 
 ---
 
-### Acceptance Criteria
-- **Given** I am an Admin, **when** I click **+ Create Event**, **then** I see a form for `title`, `location`, `date`.
-- **When** I submit valid data, **then** an event is created and I’m redirected to the event detail or list view.
-- **Given** I am not an Admin, **when** I call create/update/delete APIs, **then** I receive **403 Forbidden**.
-- **Given** a new event, **then** `performers`, `playlist`, `media`, `finalPlaylist`, `tallies`, and `topDays` are empty/initial defaults and will be populated by later workflows.
+## Important Rules
+- **Past events**: all interest/availability POSTs return `403 EVENT_IN_PAST`.
+- **Computed, not stored**: `capabilities`, `tallies`, `topDays`.
+- **Weekdays enum**: `"MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT" | "SUN"`.
 
----
-
-### Out of Scope (handled by other endpoints)
-- **Playlist** CRUD → `POST /api/events/:id/playlist`, `PATCH /api/playlist/:playlistItemId`, `DELETE /api/playlist/:playlistItemId`.
-- **Media** uploads/links → `POST /api/events/:id/media/presign`, `POST /api/events/:id/media`, `DELETE /api/media/:mediaId`.
-- **Final mix** link → `PUT /api/events/:id/final-playlist`, `DELETE /api/events/:id/final-playlist`.
-- **Performers** derived from members’ `POST /api/events/:id/interest` (not admin-edited).
 
 ## Scenario 3 — Join Team (Guest → Member via Admin Approval) — Login Required
 
