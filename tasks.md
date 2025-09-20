@@ -438,3 +438,65 @@ Body: { “days”: Weekday[] }   // e.g., [“SUN”,“MON”]
 - Session info available in frontend via `useSession()`.
 - Express backend can verify session/JWT and identify the user.
 - Logout works and clears session.
+
+### **Day 7 — Members CRUD (Public read, Admin write)**
+
+**Goal**
+- Expose members publicly.
+- Allow admins to create/update/delete members.
+- Validate inputs with Zod and guard writes with admin middleware.
+
+**Endpoints**
+- `GET /api/members` — **public** list (role=MEMBER)
+- `GET /api/members/:memberId` — **public** detail
+- `POST /api/members` — **admin** create
+- `PATCH /api/members/:memberId` — **admin** update
+- `DELETE /api/members/:memberId` — **admin** delete
+
+**Zod Schemas** (`apps/api/src/schemas/members.schemas.ts`)
+- `MemberIdParams`: `{ memberId: string }`
+- `CreateMemberBody`:
+  - `{ name: string(1..120), avatarUrl: string.url(), description: string(1..2000) }`
+- `PatchMemberBody`:
+  - `{ name?: string(1..120), avatarUrl?: string.url(), description?: string(1..2000) }`
+  - `refine` to ensure at least one field provided.
+
+**Route wiring** (`apps/api/src/routes/members.routes.ts`)
+- `GET /api/members` → controller.list
+- `GET /api/members/:memberId` → `validateParams(MemberIdParams)` → controller.get
+- `POST /api/members` → `authSession` → `requireRole('ADMIN')` → `validateBody(CreateMemberBody)` → controller.create
+- `PATCH /api/members/:memberId` → `authSession` → `requireRole('ADMIN')` → `validateParams(MemberIdParams)` → `validateBody(PatchMemberBody)` → controller.patch
+- `DELETE /api/members/:memberId` → `authSession` → `requireRole('ADMIN')` → `validateParams(MemberIdParams)` → controller.remove
+
+**Controllers** (thin)
+- Read `req.validated` and call services; return JSON.
+
+**Services** (`apps/api/src/services/members.service.ts`)
+- `listMembers({ search? })` → Prisma `User.findMany({ where: { role: 'MEMBER' } })` (optional search on name)
+- `getMember(memberId)` → Prisma `User.findUnique` (ensure role=MEMBER)
+- `createMember(data)` → Prisma `User.create({ data: { ...data, role: 'MEMBER' } })`
+- `patchMember(memberId, partial)` → Prisma update (ensure role=MEMBER)
+- `deleteMember(memberId)` → Prisma delete (or soft delete)
+
+**Validation rules**
+- `avatarUrl` is **required** on create (per your spec).
+- `name` required; `description` required (used on profile card).
+- Patch allows partial updates but must include ≥1 field.
+
+**Auth & Middleware**
+- Public GETs: no auth.
+- Writes: `authSession` + `requireRole('ADMIN')`.
+- Zod validation on all param/body inputs.
+- Global error handler formats `422/403/404`.
+
+**DoD ✅**
+- Public can:
+  - `GET /api/members` → list of members (id, name, avatarUrl, description)
+  - `GET /api/members/:memberId` → detail record
+- Admin can:
+  - `POST` create a member (role automatically set to MEMBER)
+  - `PATCH` edit name/avatarUrl/description
+  - `DELETE` remove a member
+- Non-admin write attempts → **403**
+- Bad inputs → **422** with field errors
+- Unknown member id → **404**
