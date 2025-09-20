@@ -640,3 +640,75 @@ Body: { “days”: Weekday[] }   // e.g., [“SUN”,“MON”]
 - Valid submission triggers SES email to admins.
 - Frontend shows success message & redirects.
 - Errors (422/429/500) are gracefully handled on UI.
+
+### **Day 10 — Fetch & Search Events (`GET /api/events`)**
+
+**Goal**
+- Build the public **“See All Events”** API.
+- When user clicks **Events** in the navbar, fetch **all events** (no pagination needed).
+- Support simple filters: `status` (upcoming/past/all) and `search` (title/location).
+- Return lightweight card data and set short cache headers.
+
+---
+
+## Endpoints
+
+### Public
+- `GET /api/events`  
+  **Query (optional):**  
+  - `status`: `"upcoming" | "past" | "all"` (default: `"all"`)  
+  - `search`: free-text over `title` **or** `location` (case-insensitive)
+
+**Behavior**
+- `status=upcoming` → events with `date > now`
+- `status=past` → events with `date <= now`
+- `status=all` → no date filter
+- If `search` present → `title CONTAINS search` **OR** `location CONTAINS search` (case-insensitive)
+- Return lightweight event cards: `id, title, location, date, coverUrl`
+- Set cache header: `Cache-Control: public, s-maxage=60`
+
+**Errors**
+- `422` invalid query (Zod)
+- `500` server error
+
+---
+
+## Frontend UX
+- Navbar **Events** → navigate `/events` → call `GET /api/events` **without params** to show all.
+- Optional UI controls:
+  - Filter pills: **All | Upcoming | Past** → refetch with `status=...`
+  - Search input → on submit, refetch with `search=...`
+- Render a **responsive grid** of event cards using returned fields.
+
+---
+
+## Middleware & Wiring
+- `validateQuery` (Zod) on `GET /api/events`.
+- No auth required (public).
+- Global error handler formats `422/500`.
+
+**Route**
+- `GET /api/events` → `validateQuery(ListEventsQuery)` → `eventsController.list`
+
+---
+
+## Services
+- `eventsService.list({ status, search })`
+  - Build Prisma `where`:
+    - Date filter from `status`
+    - `OR`-filter for `search` on `title`/`location` (mode: `insensitive`)
+  - `select`: `{ id, title, location, date, coverUrl }`
+  - Return array
+
+---
+
+## Zod Schemas
+```ts
+// apps/api/src/schemas/events.schemas.ts
+import { z } from "zod";
+
+export const ListEventsQuery = z.object({
+  status: z.enum(["upcoming", "past", "all"]).optional().default("all"),
+  search: z.string().trim().max(120).optional()
+});
+export type ListEventsQueryInput = z.infer<typeof ListEventsQuery>;
