@@ -350,3 +350,46 @@ Body: { “days”: Weekday[] }   // e.g., [“SUN”,“MON”]
   - Bad eventId → 404
   - Bad body (`days: ["FUNDAY"]`) → 422
 
+### **Day 5 — Admin Event CRUD + Validation (TypeScript + Zod)**
+**Goal**
+- Implement create/update/delete for Events.
+- Validate inputs with Zod.
+- Protect routes with admin-only middleware (stub today; real auth on Day 6).
+
+**Endpoints (Admin-only)**
+- `POST /api/events` — create
+- `PATCH /api/events/:eventId` — update core fields
+- `DELETE /api/events/:eventId` — delete
+
+**Tasks**
+- **Schemas** (`apps/api/src/schemas/events.schemas.ts`)
+  - `EventIdParams`: `{ eventId: string }` (use your IdSchema if you have one)
+  - `CreateEventBody`: `{ title (1–120), location (1–160), date (ISO-8601) }`
+  - `PatchEventBody`: `{ title?, location?, date? }` + refine(≥1 field)
+- **Middleware**
+  - Use `validateParams/validateBody` (Zod).
+  - Use `authSession` (stub today) and `requireRole('ADMIN')` (check `req.user?.role`).
+- **Routes** (`apps/api/src/routes/events.routes.ts`)
+  - `POST /api/events` → `authSession` → `requireRole('ADMIN')` → `validateBody(CreateEventBody)` → controller.create
+  - `PATCH /api/events/:eventId` → `authSession` → `requireRole('ADMIN')` → `validateParams(EventIdParams)` → `validateBody(PatchEventBody)` → controller.patch
+  - `DELETE /api/events/:eventId` → `authSession` → `requireRole('ADMIN')` → `validateParams(EventIdParams)` → controller.remove
+- **Controllers** (thin)
+  - Read `req.validated`, call services, send JSON / 201 / 200 / 204.
+- **Services** (`apps/api/src/services/events.service.ts`)
+  - `createEvent({ title, location, date })` → Prisma create → return `{ id, title, location, date }`
+  - `patchEvent(eventId, partial)` → Prisma update (404 if missing) → return updated fields
+  - `deleteEvent(eventId)` → Prisma delete (or soft-delete) → controller sends 204
+- **Errors**
+  - `403` when non-admin
+  - `422` for Zod validation failures
+  - `404` when event not found
+  - All formatted by global error handler
+
+**DoD ✅**
+- Admin can:
+  - **Create** event → `201` with `{ id, title, location, date }`
+  - **Update** event core fields → `200` with updated fields
+  - **Delete** event → `204` no content
+- Non-admin write attempts return **403**.
+- Invalid payloads return **422** with field errors.
+- Basic Postman tests run for happy & error paths.
