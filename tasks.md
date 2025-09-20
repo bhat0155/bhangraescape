@@ -393,3 +393,48 @@ Body: { “days”: Weekday[] }   // e.g., [“SUN”,“MON”]
 - Non-admin write attempts return **403**.
 - Invalid payloads return **422** with field errors.
 - Basic Postman tests run for happy & error paths.
+
+### **Day 6 — Authentication (Auth.js + Google + Prisma)**
+**Goal**
+- Implement user login/logout using Auth.js (NextAuth).
+- Store user records in Postgres via Prisma.
+- Expose session info to frontend and backend.
+
+**Tasks**
+- **Setup Auth.js**
+  - Install `next-auth`, `@auth/prisma-adapter`.
+  - Add `/app/api/auth/[...nextauth]/route.ts`.
+  - Configure `GoogleProvider` with client ID/secret (from Google Cloud Console).
+  - Configure `PrismaAdapter` for session/user persistence.
+- **Prisma Setup**
+  - Update `User` model in schema if needed:
+    ```prisma
+    model User {
+      id        String   @id @default(cuid())
+      name      String?
+      email     String?  @unique
+      image     String?
+      role      Role     @default(GUEST)
+      createdAt DateTime @default(now())
+      updatedAt DateTime @updatedAt
+    }
+    ```
+  - Run `npx prisma migrate dev -n add_auth`.
+- **Frontend**
+  - Add login/logout buttons using `signIn('google')` / `signOut()`.
+  - Display logged-in user’s name/avatar from `useSession()`.
+- **Backend Integration**
+  - Configure Auth.js to issue JWT (so Express backend can verify).
+  - Add middleware in Express (`authSession`) that decodes and validates JWT.
+  - For now: just log `req.user` in one protected route to confirm auth flow.
+- **Testing**
+  - Log in with Google → check user row created in DB.
+  - Refresh page → session persists.
+  - Call a protected backend route with JWT attached → backend sees `req.user`.
+
+**DoD ✅**
+- User can log in with Google.
+- User is persisted in Postgres (`User` table).
+- Session info available in frontend via `useSession()`.
+- Express backend can verify session/JWT and identify the user.
+- Logout works and clears session.
