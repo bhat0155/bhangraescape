@@ -618,3 +618,25 @@ Body: { “days”: Weekday[] }   // e.g., [“SUN”,“MON”]
   z.object({
     action: z.enum(["APPROVE", "REJECT"])
   })
+
+  ## Day 9 — Contact Us Endpoint
+
+### Tasks
+- [ ] Create `ContactController` with `POST /api/contactus`.
+- [ ] Add `zod` schema for `{ name, email, message }`.
+- [ ] Apply `validateBody` middleware (Zod).
+- [ ] Implement `ContactService.submitMessage(payload)`:
+  - (optional) Store in `ContactMessage` table.
+  - Always send email to admins via SES.
+- [ ] Add rate limiting middleware (e.g., 5 requests / 10 min per IP).
+- [ ] Build frontend form with:
+  - Fields: name, email, message.
+  - Client-side validation for instant feedback.
+  - On success → show “Thank you” screen, redirect to homepage.
+
+### DoD (Definition of Done)
+- API rejects invalid input with `422`.
+- Rate limit works (returns `429` on spam).
+- Valid submission triggers SES email to admins.
+- Frontend shows success message & redirects.
+- Errors (422/429/500) are gracefully handled on UI.
