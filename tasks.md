@@ -200,3 +200,153 @@ contact.routes.ts
 - Project layout matches the structure above (routes → controllers → services, plus middleware & schemas).
 
 > **Reminder for tomorrow (Day 4):** you’ll replace stubs with **real logic** for Scenario 1 (Event detail, Interest, Availability), using the Zod schemas you created today.
+
+# Day 4 — Scenario 1: Event Detail, Interest & Availability
+## Goals
+Implement member-facing features for a single event:
+- Compute and return **capabilities** for the current user
+- Return **performers**, **tallies**, and **topDays**
+- Allow **interest toggle** (Yes/No)
+- Allow **availability** selection (Weekday[])
+
+> Writes are **future events only**. Guests can read, not write.
+
+---
+
+## Endpoints (backend)
+
+### 1) Get Event Detail (with computed fields)
+
+GET /api/events/:eventId
+**Server computes & returns:**
+- `capabilities`: `{ canSetInterest, canSetAvailability }`
+- `performers`: list of users where `Interest.interested = true`
+- `tallies`: `{ MON, TUE, WED, THU, FRI, SAT, SUN }` from `AvailabilityPreference.days`
+- `topDays`: top 2 by YES count (tie-breaker: MAYBE not used here; if you later add MAYBE, tie-break MAYBE desc, then date asc)
+- `interested`: current user’s value or `false` if none
+- `myDays`: current user’s availability days or `[]` if none
+
+**Rules:**
+- `eventIsFuture = event.date > nowUTC`
+- `canSetInterest = isMemberOrAdmin && eventIsFuture`
+- `canSetAvailability = isMemberOrAdmin && eventIsFuture`
+
+---
+
+### 2) Toggle Interest
+POST /api/events/:eventId/interest
+Body: { “interested”: boolean }
+**Behavior:**
+- Upsert `Interest` (unique on `eventId + userId`)
+- Only if **future** event and **role ∈ {MEMBER, ADMIN}**
+- Returns `{ interested, performerCount }`
+
+**Errors:**
+- `401` unauthenticated
+- `403` guest or past event
+- `404` event not found
+- `422` invalid body
+
+---
+
+### 3) Get Availability (myDays + tallies)
+GET /api/events/:eventId/availability
+**Returns:**
+- `myDays` for current user
+- `tallies` for all users
+- `topDays` (top 2)
+
+---
+
+### 4) Set Availability
+POST /api/events/:eventId/availability
+Body: { “days”: Weekday[] }   // e.g., [“SUN”,“MON”]
+**Behavior:**
+- Upsert `AvailabilityPreference` (unique on `eventId + userId`)
+- Recompute `tallies` + `topDays` and return them
+
+**Errors:**
+- `401` unauthenticated
+- `403` guest or past event
+- `404` event not found
+- `422` invalid days
+
+---
+
+## Data sources (DB)
+- `Event` (id, title, location, date, …)
+- `Interest` (`eventId`, `userId`, `interested`, `@@unique([eventId,userId])`)
+- `AvailabilityPreference` (`id`, `eventId`, `userId`, `days: Weekday[]`, `@@unique([eventId,userId])`)
+- `User` (id, name, avatarUrl, description, role)
+
+---
+
+## Zod request schemas (inputs)
+- `GetEventParams`: `{ eventId: string }`
+- `InterestBody`: `{ interested: boolean }`
+- `AvailabilityBody`: `{ days: Weekday[] }` (Weekday ∈ {MON…SUN})
+
+*(You created these file shells on Day 3; today you finalize the shapes.)*
+
+---
+
+## Services (business logic you implement)
+- `getEventDetail(eventId, user)`
+  - Load event; compute `eventIsFuture`
+  - Query `Interest` where `interested=true` → build `performers` (id, name, avatarUrl, description)
+  - Query all `AvailabilityPreference` → reduce to `tallies`
+  - Compute `topDays` = top 2 by count (stable tie-break by weekday order if needed)
+  - `myDays` from current user’s row; `interested` from their `Interest`
+  - Compute `capabilities` per rules above
+- `updateInterest(userId, eventId, interested)`
+  - Guard: role + future date
+  - Upsert Interest
+  - Return `{ interested, performerCount }`
+- `updateAvailability(userId, eventId, days)`
+  - Guard: role + future date
+  - Upsert AvailabilityPreference
+  - Recompute and return `{ myDays, tallies, topDays }`
+
+---
+
+## Controllers (thin)
+- Read validated `params/body`, read `req.user` (temporary stub ok today)
+- Call service
+- Return JSON
+- Throw/next on errors → global error handler formats response
+
+---
+
+## Middleware usage today
+- `validateParams/validateBody` (Zod) on these routes
+- `authSession` can be **stubbed** today (real parsing Day 6)
+- **Do not** forget: server must still enforce guards in services
+
+---
+
+## Definition of Done (DoD)
+- `GET /api/events/:eventId` returns:
+  - `capabilities`, `performers`, `tallies`, `topDays`, `interested`, `myDays`
+- `POST /api/events/:eventId/interest` toggles and returns `interested` + `performerCount`
+- `GET/POST /api/events/:eventId/availability` returns/updates `myDays`, `tallies`, `topDays`
+- Past events reject writes with **403**
+- Guests cannot write (403), but can read detail/availability
+- Basic Postman tests recorded (happy + error paths)
+
+---
+
+## Test matrix (quick)
+- **Future event, MEMBER**
+  - GET detail → `canSet* = true`
+  - POST interest true/false → success
+  - POST availability `["SUN","MON"]` → success, tallies update
+- **Past event, MEMBER**
+  - GET detail → `canSet* = false`
+  - POST interest/availability → 403
+- **Guest**
+  - GET detail/availability → 200
+  - POST interest/availability → 403
+- **Invalid**
+  - Bad eventId → 404
+  - Bad body (`days: ["FUNDAY"]`) → 422
+
