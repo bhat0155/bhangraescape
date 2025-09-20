@@ -500,3 +500,121 @@ Body: { “days”: Weekday[] }   // e.g., [“SUN”,“MON”]
 - Non-admin write attempts → **403**
 - Bad inputs → **422** with field errors
 - Unknown member id → **404**
+
+### **Day 8 — Join Team (Auth Required) + Admin Review + Email (SES) + Rate Limit**
+
+**Goal**
+- Logged-in users can submit a **Join Team** request.
+- Show “request already sent” while status is **PENDING**.
+- Admins can **list** and **approve/reject** requests.
+- Send an **email notification to admins (SES)** when a request is submitted.
+- Add **rate limiting** to protect POST endpoints from abuse.
+
+---
+
+## Endpoints
+
+### Public (UI visible to everyone, submit requires login)
+- `POST /api/join-team`  
+  **Body**: `{ message?: string }` (name & email come from session)  
+  **Auth**: required (redirect to login in the web app)  
+  **Behavior**:
+  - If no existing PENDING request → create `PENDING`
+  - If existing `PENDING` → return same state (no duplicate)
+  - If `REJECTED`/`APPROVED` → allow new `PENDING`
+  - Send email to admins (SES)
+  - Return `202 { "status": "queued" }`
+  **Errors**:
+  - `401` if not logged in
+  - `429` if rate limit exceeded
+  - `500` on email failure (request may still be stored)
+
+### Admin
+- `GET /api/join-requests?status=PENDING|APPROVED|REJECTED`  
+  **Auth**: admin  
+  **Returns**: list (id, userId, name, email, message, status, createdAt)
+
+- `PATCH /api/join-requests/:id`  
+  **Auth**: admin  
+  **Body**: `{ action: "APPROVE" | "REJECT" }`  
+  **Behavior**:
+  - APPROVE → set status=APPROVED and promote user to MEMBER
+  - REJECT → set status=REJECTED
+  - Return updated record (or `{ ok: true }`)
+
+---
+
+## Frontend UX
+
+- On Event pages (for non-members):
+  - Show **Join Team** button instead of interest/availability.
+  - If user not logged in → clicking opens **Sign-in**.
+  - If logged in:
+    - If user has a `PENDING` join request → show **“Join request already sent”** (disable button).
+    - Else → clicking submits `POST /api/join-team`, then show success toast + “request sent” state.
+
+- Admin navbar: **Requests** page
+  - List PENDING requests.
+  - Approve/Reject buttons (optimistic UI allowed).
+  - On APPROVE → user becomes **MEMBER**.
+
+---
+
+## SES — Email Flow
+
+**Setup**
+1. Verify sender domain/email in AWS SES.
+2. Configure IAM user with `ses:SendEmail`.
+3. Add env vars:
+   - `AWS_REGION=us-east-1`
+   - `SES_FROM=admin@yourdomain.com`
+   - `ADMIN_NOTIFY=admins@yourdomain.com`
+
+**Service flow**
+- In `JoinRequestsService.submitJoinRequest`:
+  1. Create `JoinRequest(PENDING)`.
+  2. Call `EmailSender.notifyAdmins()` with subject/body.
+  3. Return `202 { status: "queued" }`.
+
+---
+
+## Rate Limiting
+
+- Protect `POST /join-team` and `POST /contactus`.
+- Example: **5 requests / 10 minutes / IP**.
+- On exceed → `429 Too Many Requests`.
+
+---
+
+## Middleware & Wiring
+
+- `authSession` (from Day 6): ensures user is logged in.
+- `requireRole('ADMIN')` for admin endpoints.
+- `rateLimitJoin` middleware on `POST /join-team`.
+- `validateBody` (Zod) for `PATCH /join-requests/:id`.
+
+---
+
+## Services
+
+- `submitJoinRequest(user, message?)`
+  - Create or return existing `PENDING` request.
+  - Notify admins via SES.
+  - Return `{ status: "queued" }`.
+
+- `listJoinRequests({ status })`
+  - Filter by status; order by `createdAt DESC`.
+
+- `reviewJoinRequest(id, action)`
+  - APPROVE → set status=APPROVED; `User.role = MEMBER`
+  - REJECT → set status=REJECTED
+
+---
+
+## Zod Schemas
+
+- `ReviewActionSchema`:  
+  ```ts
+  z.object({
+    action: z.enum(["APPROVE", "REJECT"])
+  })
