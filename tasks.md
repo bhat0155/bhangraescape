@@ -712,3 +712,18 @@ export const ListEventsQuery = z.object({
   search: z.string().trim().max(120).optional()
 });
 export type ListEventsQueryInput = z.infer<typeof ListEventsQuery>;
+
+// dod
+- Clicking **Events** in the navbar loads `/events` and fetches all events (no query params).
+- `GET /api/events` endpoint is implemented with:
+  - `status` filter (`all`, `upcoming`, `past`)
+  - `search` filter (title/location, case-insensitive)
+- Returns only **card fields**: `id`, `title`, `location`, `date`, `coverUrl`.
+- Zod validates query params:
+  - Invalid inputs → `422 Unprocessable Entity`
+- Successful request → `200 OK` with `items[]`.
+- Cache headers set: `Cache-Control: public, s-maxage=60`.
+- Postman tests verify:
+  - No params → all events
+  - `status=upcoming`, `status=past`
+  - `search=<keyword>`
