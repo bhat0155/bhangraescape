@@ -846,3 +846,26 @@ DoD
    ```env
    SPOTIFY_CLIENT_ID=xxx
    SPOTIFY_CLIENT_SECRET=xxx
+
+### **Day 13 — Maps (“Find Us”) — With On-Page Map + Click-to-Open Directions**
+
+**Goal**
+- Show a **map on the webpage** with a marker at your practice location.
+- Include a **button/link** that opens **Google Maps directions** to the same destination.
+- Offer two implementation options:
+  - **Option A: Google Maps Embed** (simple iframe; needs API key)
+  - **Option B: Leaflet + OpenStreetMap** (no API key; lightweight)
+
+> Pick **one** for Day 13. If you want zero keys and full control, use **Leaflet**. If you want Google look/feel and you already planned a Maps key, use **Embed**.
+
+---
+
+## 🔧 Destination (shared config for both options)
+
+Choose **one** style in your configuration:
+
+- **Address-based** (simplest):
+  ```env
+  NEXT_PUBLIC_PRACTICE_ADDRESS="123 Main St, Ottawa, ON"
+
+  
