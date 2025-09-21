@@ -868,4 +868,207 @@ Choose **one** style in your configuration:
   ```env
   NEXT_PUBLIC_PRACTICE_ADDRESS="123 Main St, Ottawa, ON"
 
-  
+  ### **Day 14 — Frontend Integration & UX Polish**
+
+**Goal**
+- Wire **all pages** to your APIs, add role-aware UI, loading/error states, and make it responsive & accessible.
+
+---
+
+## Pages & Wiring
+
+- **Navbar / Routing**
+  - Home, Events (`/events`), Members (`/members`), Contact (`/contact`), (Admin) Requests (`/requests`), Sign in/out.
+  - Active link highlighting.
+
+- **Events List (`/events`)**
+  - Fetch `GET /api/events` on load (no params) → render card grid.
+  - Filter pills: **All | Upcoming | Past** → refetch with `status`.
+  - Search input → refetch with `search`.
+
+- **Event Detail (`/events/:id`)**
+  - Fetch `GET /api/events/:id`.
+  - Respect `capabilities`: show **Interested** toggle & **Availability** (7-day tabs) only if `canSetInterest/canSetAvailability` are true.
+  - Post interest: `POST /api/events/:id/interest`.
+  - Post availability: `POST /api/events/:id/availability`.
+  - Show **Performers** avatars.
+  - Show **TopDays** chips (from API).
+  - **Playlist**: list songs (title, artist, “Open in Spotify”).
+  - **Final Mix**: show link if present.
+  - **Media**: thumbnails open target URL.
+
+- **Admin controls (only if role=ADMIN)**
+  - Event Detail → **Playlist tab** (Add URL → POST /playlist; edit/delete).
+  - Event Detail → **Media tab** (Presign → S3 upload → Register; delete).
+  - Event Detail → **Final Mix tab** (PUT /final-playlist, DELETE).
+  - (Optional) Event edit core fields (PATCH /api/events/:id).
+
+- **Members List (`/members`)**
+  - Public: `GET /api/members` → card grid (avatar, name).
+  - Click card → **Member Detail** page (`/members/:id`) with description.
+
+- **Join Team**
+  - If user **not logged in**: show **Join Team** button → triggers login.
+  - If logged in and role=GUEST:
+    - If existing **PENDING** request → show “Request already sent”.
+    - Else → POST `/api/join-team` → success toast.
+  - If role=MEMBER/ADMIN: hide join UI.
+
+- **Admin Requests (`/requests`)**
+  - Admin-only page: `GET /api/join-requests?status=PENDING`.
+  - Approve/Reject buttons → `PATCH /api/join-requests/:id`.
+  - On APPROVE, user becomes MEMBER (backend) → optimistic row removal.
+
+- **Contact Us (`/contact`)**
+  - Public form with client-side validation.
+  - Submit → `POST /api/contactus` → show success view “Thanks! We’ll contact you soon.” → back to Home.
+
+- **Find Us (Map)**
+  - On-page map (Leaflet or Google Embed) + **Open in Google Maps** button.
+
+---
+
+## State, Errors, Loading
+
+- **React Query** (or SWR)
+  - Query keys: `["events"]`, `["event", id]`, `["members"]`, `["member", id]`, `["requests"]`.
+  - **Invalidate** on mutations: interest/availability, playlist, media, final mix, join-requests.
+- **Loading states**: skeletons/placeholders for all pages.
+- **Error states**: inline messages + retry buttons.
+- **Toasts** for success/error on mutations.
+
+---
+
+## Role-aware UI
+
+- Hide admin controls unless `user.role === "ADMIN"`.
+- Hide interest/availability for guests; show **Join Team** instead.
+- Disable controls when `capabilities` false (past events).
+
+---
+
+## Responsiveness & A11y
+
+- Mobile-first: card grids wrap nicely, nav collapses.
+- Focus states on buttons/links, semantic headings.
+- Color contrast and ARIA labels for map iframe/button.
+
+---
+
+## DoD ✅ (Day 14)
+
+- All pages render real API data and handle loading/error states.
+- Role-aware UI works (Guest/Member/Admin).
+- Interest & availability update **without page refresh** (React Query invalidate).
+- Admin playlist/media/final mix flows work end-to-end.
+- Contact form submits and shows success view.
+- Requests page functions for admins (approve/reject).
+- Map displays + directions button works.
+- Basic responsiveness & accessibility checks pass.
+
+---
+
+---
+
+### **Day 15 — QA, Security Hardening & Deployment to AWS**
+
+**Goal**
+- Final QA pass, security and performance checks, and deploy the app (cheapest path) to AWS.
+- Produce a **Runbook** and **Rollback** notes.
+
+---
+
+## Backend Hardening
+
+- **Validation audit**: Zod on **all** POST/PATCH endpoints.
+- **Auth/Role guards**: ensure `requireRole('ADMIN')` where needed.
+- **Rate limits**:
+  - `POST /contactus`, `POST /join-team` → 5 req / 10 min / IP.
+- **Security headers**:
+  - `helmet` basics; set `cors` to your frontend domain.
+- **Caching**:
+  - `GET /api/events` → `Cache-Control: public, s-maxage=60`.
+  - (Optional) `GET /api/events/:id` short cache (e.g., s-maxage=30).
+- **Logs**:
+  - Request logging with request-id; error logging includes stack + user id (if present).
+- **Env checks**:
+  - Ensure `.env` not committed.
+  - Verify SES/S3/Spotify credentials present in prod.
+
+---
+
+## Frontend Polish
+
+- Replace any placeholder text/images.
+- Meta tags: title/description per page.
+- **Sitemap** (`/sitemap.xml`) and `robots.txt` (optional).
+- 404 and 500 pages.
+- Lighthouse quick pass (performance & a11y).
+
+---
+
+## Deployment (Cheapest AWS)
+
+> Single EC2 instance hosting both backend API and Next.js frontend; S3 for media; SES for email; PostgreSQL via a managed service (e.g., Supabase/RDS) or a small hosted DB.
+
+**Provision**
+1. **DB**: Use **Supabase** (free-ish tier) or **RDS t4g.micro**.
+2. **EC2**: t3.small (or t4g.small if ARM) Ubuntu.
+3. **S3** bucket (already created Day 11).
+4. **SES** verified identity + out of sandbox if emailing the public.
+
+**On EC2**
+- Install Node LTS, pm2, Nginx, Certbot.
+- Clone repo; set `.env` for API and `.env.local` for Next.js.
+- `npm ci` (monorepo or split folders).
+- **Build**:
+  - Backend: `npm run build` → start with `pm2 start dist/server.js --name api`
+  - Frontend: `npm run build` → `npm run start` (Node server) or export static if applicable
+- **Reverse proxy** with Nginx:
+  - `https://api.yourdomain.com` → Node API port
+  - `https://www.yourdomain.com` → Next.js port
+- TLS with **Let’s Encrypt** (`certbot --nginx`).
+
+**DNS**
+- `A` records for `api.` and `www.` to EC2 public IP (or use a small Cloudflare proxy).
+
+**Smoke Tests**
+- Health check (`/healthz`) returns 200.
+- Create/fetch an event.
+- Submit contact form (verify SES email).
+- Join request flow (approve → role changes).
+- Admin upload media (presign → S3 register).
+- Event detail renders playlist/final mix/media.
+
+**Runbook**
+- Start/stop:
+  - `pm2 status`, `pm2 restart api`, `pm2 restart web`
+- Logs:
+  - `pm2 logs api`, `pm2 logs web`
+- Env change: pull `.env` changes → rebuild → restart.
+- Backups: DB snapshots (if RDS) or Supabase backups.
+
+**Rollback**
+- Keep previous tag/release.
+- `pm2 restart api@prev` / `web@prev` or `git checkout <tag>`, rebuild, restart.
+
+---
+
+## DoD ✅ (Day 15)
+
+- All endpoints validated, rate-limited where needed.
+- Security headers + CORS configured.
+- Caching headers on events list (and optional event detail).
+- EC2 instance serving **HTTPS** for both frontend and API via Nginx.
+- S3 media working end-to-end in prod.
+- SES sending emails from prod identity.
+- Database reachable, migrations run.
+- Smoke tests pass; Runbook & Rollback docs added to repo (`/docs/runbook.md`).
+
+---
+
+## Bonus (Time Permitting)
+
+- Add **Admin Settings** page to edit practice location (for map).
+- Basic **analytics** (e.g., Plausible/GA).
+- 1–2 **e2e tests** with Playwright (smoke flows).
