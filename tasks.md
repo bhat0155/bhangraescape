@@ -813,3 +813,36 @@ DoD
 	•	Zod validation in place for body params.
 	•	Postman tests cover happy path and errors.
 	•	At least one uploaded file visible in event’s media[].
+
+    ### **Day 12 — Playlist (Spotify) + Final Mix (SoundCloud/Local) — Admin-only**
+
+**Goal**
+- Allow **admins** to manage an event’s **playlist** (songs referenced from Spotify/YouTube/external).
+- Allow **admins** to set a single **final mix** link (SoundCloud or local S3 URL).
+- Use **admin middleware** + **Zod** validation.
+- Keep event response shape consistent with previous contracts.
+
+---
+
+## 🔎 Concepts & What We’re Building
+
+- **Playlist items** are **references** (metadata + URL), not audio files you host.
+  - Admin pastes a **Spotify track URL** (or YouTube/External).
+  - Backend validates and **hydrates metadata**: `title`, `artist`.
+  - We store **minimal fields** in DB → display in Event detail.
+- **Final mix** is a **single link** per event:
+  - Either **SoundCloud URL** or **S3/CloudFront URL**.
+  - Stored on Event: `{ provider, title, url }`.
+
+---
+
+## 🧰 Setup (Secrets & SDKs)
+
+### Spotify
+1. Go to **developer.spotify.com → Dashboard → Create App**.
+2. Get **Client ID** and **Client Secret**.
+3. Auth flow: **Client Credentials** (server-to-server).
+4. Add to `.env`:
+   ```env
+   SPOTIFY_CLIENT_ID=xxx
+   SPOTIFY_CLIENT_SECRET=xxx
