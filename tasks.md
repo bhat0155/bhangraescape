@@ -727,3 +727,89 @@ export type ListEventsQueryInput = z.infer<typeof ListEventsQuery>;
   - No params → all events
   - `status=upcoming`, `status=past`
   - `search=<keyword>`
+
+  ### **Day 11 — Media Uploads via S3 (Admin-only)**
+
+**Goal**
+- Allow admins to upload images/videos for an event.
+- Store files in **Amazon S3** (cheap, scalable file storage).
+- Protect endpoints with **admin middleware**.
+- Support CRUD: upload, register, delete.
+
+---
+
+## Teaching — S3 Basics
+
+- **Amazon S3** = Simple Storage Service. Think of it as a cloud hard drive.
+- Files go into **buckets** (like folders).
+- Each file (object) has a **key** (its path/name).
+- Public can’t upload directly → instead we use **pre-signed URLs**:
+  1. Admin requests a pre-signed URL from backend.
+  2. Backend calls AWS S3 SDK → generates a short-lived URL (e.g., valid 1 minute).
+  3. Admin’s browser uses that URL to upload directly to S3.
+  4. Once uploaded, admin calls backend again to **register metadata** (title, type, etc.).
+
+This avoids uploading files *through your server* → saves bandwidth and money.
+
+---
+
+## Endpoints (Admin-only)
+
+### 1. Create Pre-signed Upload URL
+http
+POST /api/events/:eventId/media/presign
+
+Body:
+{ "contentType": "image/jpeg" }
+
+ Response:
+ {
+  "uploadUrl": "https://s3.amazonaws.com/bucket/key?...",
+  "fileKey": "events/evt_123/media/abcd.jpg"
+}
+	•	Backend uses AWS SDK:
+s3.getSignedUrl("putObject", { Bucket, Key, ContentType, Expires })
+
+2. Register Media
+POST /api/events/:eventId/media
+Body: {
+  "fileKey": "events/evt_123/media/abcd.jpg",
+  "type": "IMAGE",
+  "title": "Backstage photo"
+}
+response:
+{
+  "id": "m_1",
+  "eventId": "evt_123",
+  "url": "https://cdn.mysite.com/events/evt_123/media/abcd.jpg",
+  "thumbUrl": null,
+  "title": "Backstage photo",
+  "createdAt": "2025-09-20T15:01:00Z"
+}
+3. delete media
+DELETE /api/media/:id
+response:
+{
+  "ok": true
+}
+
+
+Middleware & Validation
+	•	requireRole('ADMIN') → only admins can call these.
+	•	validateBody (Zod):
+    z.object({
+  contentType: z.string().regex(/^image\/|^video\//),
+  type: z.enum(["IMAGE", "VIDEO"]),
+  title: z.string().max(120).optional()
+})
+
+DoD 
+	•	Admin can:
+	•	Request pre-signed URL (POST /media/presign).
+	•	Upload file to S3 via that URL.
+	•	Register file in DB via POST /media.
+	•	Delete file via DELETE /media/:id.
+	•	Non-admin calls → 403 Forbidden.
+	•	Zod validation in place for body params.
+	•	Postman tests cover happy path and errors.
+	•	At least one uploaded file visible in event’s media[].
