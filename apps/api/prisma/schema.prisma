@@ -1,0 +1,167 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  GUEST
+  MEMBER
+  ADMIN
+}
+
+enum Weekday {
+  MON
+  TUE
+  WED
+  THU
+  FRI
+  SAT
+  SUN
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+enum MediaSource {
+  S3
+  YOUTUBE
+  INSTAGRAM
+  DRIVE
+}
+
+enum JoinStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PlaylistProvider {
+  SPOTIFY
+  YOUTUBE
+  EXTERNAL
+  SOUNDCLOUD
+}
+
+model User {
+  id          String   @id @default(cuid())
+  name        String?
+  email       String?  @unique
+  avatarUrl   String?
+  description String?
+  role        Role     @default(GUEST)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  interests               Interest[]
+  availabilityPreferences AvailabilityPreference[]
+  JoinRequests            JoinRequest[]
+
+  @@index([role])
+}
+
+model Event {
+  id                    String            @id @default(cuid())
+  title                 String
+  location              String
+  date                  DateTime
+  coverUrl              String?
+  finalPlaylistProvider PlaylistProvider?
+  finalPlaylistTitle    String?
+  finalPlaylistUrl      String?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  interests      Interest[]
+  availabilities AvailabilityPreference[]
+  media          Media[]
+  playlist       PlaylistItem[]
+}
+
+model Interest {
+  id         String   @id @default(cuid())
+  userId     String
+  eventId    String
+  interested Boolean
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([userId])
+  @@index([eventId])
+}
+
+model AvailabilityPreference {
+  id        String    @id @default(cuid())
+  updatedAt DateTime  @updatedAt
+  userId    String
+  eventId   String
+  days      Weekday[]
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([userId])
+  @@index([eventId])
+}
+
+model JoinRequest {
+  id         String     @id @default(cuid())
+  userId     String
+  name       String
+  email      String
+  message    String?
+  status     JoinStatus @default(PENDING)
+  createdAt  DateTime   @default(now())
+  reviewedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status, createdAt])
+}
+
+model Media {
+  id        String      @id @default(cuid())
+  eventId   String
+  type      MediaType
+  source    MediaSource
+  url       String
+  thumbUrl  String?
+  title     String?
+  createdAt DateTime    @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@index([eventId, createdAt])
+}
+
+model PlaylistItem {
+  id        String           @id @default(cuid())
+  eventId   String
+  title     String
+  provider  PlaylistProvider
+  artist    String?
+  url       String
+  createdAt DateTime         @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+}
