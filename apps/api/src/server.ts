@@ -1,8 +1,8 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const dotenv = require('dotenv');
+import express, { Request, Response } from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import dotenv from 'dotenv';
 
 // loads env
 dotenv.config();
@@ -14,7 +14,7 @@ app.use(express.json()); // for parsing application/json
 app.use(morgan("dev")); // logging
 
 // creating a health route
-app.get("/health", (req, res)=>{
+app.get("/health", (req: Request, res:Response)=>{
     res.json({ok: true})
 })
 
