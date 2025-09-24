@@ -21,5 +21,18 @@ export const eventController = {
         }catch(err){
             next(err)
         }
+    },
+
+    async getEventDetail(req: Request, res: Response, next: NextFunction){
+        try{
+            const {params}=(req as any).validated ?? {params: req.params};
+            const user = (req as any).user ?? null;
+            const data = await eventService.getEventDetail(params.eventId, user);
+            res.json(data)
+        }catch(err){
+            next(err)
+        }
     }
+
+
 }
