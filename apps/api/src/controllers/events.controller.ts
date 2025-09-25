@@ -44,6 +44,29 @@ export const eventController = {
         }catch(err){
             next(err)
         }
+    },
+
+    async getAvailability(req:Request, res: Response, next: NextFunction){
+        try{
+            const {params}= (req as any).validated ?? {params: req.params}
+            const user=(req as any).user ?? null;
+            const data = await eventService.getAvailability(params.eventId, user);
+            res.json(data)
+        }catch(err){
+            next(err)
+        }
+    },
+
+    async setAvailability(req: Request, res: Response, next: NextFunction){
+        try{
+            const {params,body}=(req as any).validated ?? {params: req.params, body: req.body};
+            const user = (req as any).user;
+            const data= await eventService.setAvailability(user, params.eventId, body.days)
+            console.log(`the eventId for set availability is ${params.eventId}`)
+            res.json(data)
+        }catch(err){
+            next(err)
+        }
     }
 
 
