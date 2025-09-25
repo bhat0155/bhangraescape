@@ -10,17 +10,21 @@ export const createEventBody = z.object({
 
 // patch event
 // refines make sure atleast one thing is updated inside body
-export const patchEventBody = z.object({
+export const patchEventBodyAndParams = z.object({
+    params: z.object({
+    eventId: z.string().min(1),
+  }),
     body: z.object({
         title: z.string().trim().min(1).max(100).optional(),
         location: z.string().trim().min(1).max(160).optional(),
-        date: z.string().trim().optional()
-    }).refine((val)=>{
-    const b = (val as any)?.body ?? {};
+        date: z.coerce.date().optional()
+    })
+}).refine((val)=>{
+    const b = val.body;
     return !!(b.title || b.location || b.date)
-
-},{message: "Provide at least one field to update (title, location, or date)."})
-});
+},{
+      message: "Provide at least one field to update (title, location, or date)." 
+})
 
 export const eventIdParam = z.object({
     params: z.object({

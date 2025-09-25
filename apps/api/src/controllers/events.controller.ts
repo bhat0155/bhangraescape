@@ -12,6 +12,16 @@ export const eventController = {
             next(err); // pass to general error handler
         }
     },
+
+    async update(req: Request, res: Response, next: NextFunction){
+        try{
+            const {body, params}=(req as any).validated ?? {body: req.body, params: req.params};
+            const result = await eventService.patchEvent(params.eventId, body)
+            return res.json(result)
+        }catch(err){
+            next(err)
+        }
+    },
     
   
     async getEventDetail(req: Request, res: Response, next: NextFunction){

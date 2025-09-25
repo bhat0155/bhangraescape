@@ -1,6 +1,6 @@
 import {Router} from "express";
 import { validate } from "../middlewares/validate";
-import { createEventBody, toggleInterestSchema, getEventParams, getAvailabilityParams, setAvailabilityParams } from "../schemas/events.schemas";
+import { createEventBody, toggleInterestSchema, getEventParams, getAvailabilityParams, setAvailabilityParams, eventIdParam, patchEventBodyAndParams } from "../schemas/events.schemas";
 import { eventController } from "../controllers/events.controller";
 import { authSession, requiredRole } from "../middlewares/auth";
 
@@ -8,6 +8,9 @@ export const eventRouter = Router();
 
 eventRouter.post("/", authSession, requiredRole(["ADMIN"]), (req, res, next)=> validate(req, res, next, createEventBody), eventController.createEvent);
 // eventRouter.get("/:eventId", (req, res, next)=> validate(req, res,next,eventIdParam), eventController.getOne); //TODO to be deleted soon
+
+// update event route
+eventRouter.patch("/:eventId", authSession, requiredRole(["ADMIN"]),(req,res,next)=>validate(req,res,next,patchEventBodyAndParams),eventController.update)
 
 // events detail, with user context if logged in
 eventRouter.get("/:eventId", authSession, (req, res, next)=> validate(req,res,next, getEventParams), eventController.getEventDetail);

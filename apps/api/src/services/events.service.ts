@@ -38,6 +38,34 @@ export const eventService = {
     //     return {ok: true}
     // },
 
+    async patchEvent(eventId: string, partial :{title? : string, location?: string, date?: Date }){
+        try{
+            const updated = await prisma.event.update({
+                where: {id:eventId},
+                data: {
+                    ...(partial.title!== undefined ? {title: partial.title}:{}),
+                     ...(partial.location!== undefined ? {title: partial.location}:{}),
+                     ...(partial.date ? {date: partial.date}: {})
+                },
+                select:{
+                    id: true,
+                    title: true,
+                    location: true,
+                    date: true,
+                    coverUrl: true
+                }
+            })
+            return updated;
+        }catch(err: any){
+            if(err.code === "P2025"){
+                const e:any = new Error("Event not found");
+                e.status = 404;
+                throw e
+            }
+            throw err;
+        }
+    },
+
     async getEventDetail(eventId: string, user: {id: string, role?: string} | null){
         const event = await prisma.event.findUnique({
             where: {id: eventId},
