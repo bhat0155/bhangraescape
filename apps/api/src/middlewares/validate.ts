@@ -5,11 +5,12 @@ import type {Request, Response, NextFunction} from "express";
 
 export const validate = (req: Request, res: Response, next: NextFunction, schema: ZodObject<any>)=>{
     try{
-        schema.parse({
+       const parse = schema.parse({
             body: req.body ?? {},
             query: req.query ?? {},
             params: req.params??{}
-        })
+        });
+        (req as any).validated = parse; // attach validated data to req
         next();
 
     }catch(err){

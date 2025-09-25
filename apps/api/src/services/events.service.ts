@@ -95,5 +95,48 @@ export const eventService = {
             myDays 
         }
 
+    },
+
+    async toggleInterest(user: {id: string, role?: string}| null, eventId: string, interested: boolean){
+        // authorization guard
+        const isMemberOrAdmin = user && ["MEMBER","ADMIN"].includes(user.role ?? "");
+        if(!isMemberOrAdmin){
+            const e: any = new Error("Not authorized");
+            e.status = 403;
+            throw e;
+        }
+
+        // check if event exists and is in future
+        const event = await prisma.event.findUnique({
+            where: {id: eventId},
+            select: {id: true, date: true}
+        });
+
+        if(!event){
+            const e: any = new Error("Event not found");
+            e.status=404;
+            throw e;
+        }
+
+        const isEventInFuture = event.date.getTime()>  Date.now();
+        if(!isEventInFuture){
+            const e:any = new Error("cannot modify past events");
+            e.status = 403;
+            throw e;
+        }
+
+        // upsert interest row
+        await prisma.interest.upsert({
+            where: {eventId_userId: {eventId, userId: user!.id}},
+            create:{eventId, userId: user!.id, interested},
+            update:{interested},
+        });
+
+        // recount performers
+        const performerCount = await prisma.interest.count({
+            where: {eventId, interested: true}
+        })
+
+        return {interested, performerCount}
     }
 }

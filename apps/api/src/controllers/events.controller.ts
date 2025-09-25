@@ -32,6 +32,18 @@ export const eventController = {
         }catch(err){
             next(err)
         }
+    },
+
+    async toggleInterest(req: Request, res: Response, next: NextFunction){
+        try{
+            const {params, body}=(req as any).validated ?? {params: req.params, body: req.body}
+            const user = (req as any).user ?? { id: "stub-user", role: "MEMBER" }
+            console.log("Toggling interest for user", user, "event", params.eventId, "interested?", body.interested);
+            const result = await eventService.toggleInterest(user, params.eventId, body.interested);
+            res.json(result);
+        }catch(err){
+            next(err)
+        }
     }
 
 
