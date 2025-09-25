@@ -287,6 +287,21 @@ export const eventService = {
 
         const topDays = computeTopDays(tallies);
         return {myDays: days, tallies, topDays}
+    },
+
+    async deleteEvent(eventId: string){
+        try{    
+            await prisma.event.delete({
+                where: {id: eventId}
+            })
+        }catch(err: any){
+            if (err?.code == "P2025"){
+                const e: any = new Error("Event not found");
+                e.status = 404;
+                throw e;
+            }
+            throw err;
+        }
     }
 
 

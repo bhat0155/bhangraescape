@@ -23,6 +23,15 @@ export const eventController = {
         }
     },
     
+    async deleteEvent(req: Request, res: Response, next: NextFunction){
+        try{
+            const {params}= (req as any).validated ?? {params: req.params};
+            const result = await eventService.deleteEvent(params.eventId);
+            return res.status(204).send();
+        }catch(err){
+            next(err)
+        }
+    },
   
     async getEventDetail(req: Request, res: Response, next: NextFunction){
         try{

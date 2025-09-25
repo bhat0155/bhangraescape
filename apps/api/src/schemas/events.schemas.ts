@@ -26,6 +26,14 @@ export const patchEventBodyAndParams = z.object({
       message: "Provide at least one field to update (title, location, or date)." 
 })
 
+// delete event
+// DELETE /api/events/:eventId
+export const deleteEventParams = z.object({
+  params: z.object({
+    eventId: z.string().min(1),
+  }),
+});
+
 export const eventIdParam = z.object({
     params: z.object({
         eventId: z.string().min(1)
