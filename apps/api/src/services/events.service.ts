@@ -13,12 +13,30 @@ function computeTopDays(tallies: Record<string, number>){
 }
 
 export const eventService = {
-    async createEvent(data: {title: string, description: string, date: string}){
-        return {ok: true}
+    async createEvent(input: {title: string, location: string, date: string}){
+        // convert string into date object and validate
+
+        const created = await prisma.event.create({
+            data: {
+                title: input.title.trim(),
+                location: input.location.trim(),
+                date: input.date
+            },
+            select:{
+                id: true,
+                title: true,
+                location: true,
+                date: true,
+                coverUrl: true
+            }
+        })
+        return created;
     },
-    async getOne(_eventId: string){
-        return {ok: true}
-    },
+
+    //TODO to be deleted soon
+    // async getOne(_eventId: string){
+    //     return {ok: true}
+    // },
 
     async getEventDetail(eventId: string, user: {id: string, role?: string} | null){
         const event = await prisma.event.findUnique({

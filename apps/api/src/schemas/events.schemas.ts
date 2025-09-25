@@ -3,10 +3,24 @@ import {z} from 'zod';
 export const createEventBody = z.object({
     body: z.object({
         title: z.string().min(1).max(120),
-        description: z.string().min(1).max(400),
-        date: z.string().date(),
+        location: z.string().min(1).max(400),
+        date: z.coerce.date()
     })
 })
+
+// patch event
+// refines make sure atleast one thing is updated inside body
+export const patchEventBody = z.object({
+    body: z.object({
+        title: z.string().trim().min(1).max(100).optional(),
+        location: z.string().trim().min(1).max(160).optional(),
+        date: z.string().trim().optional()
+    }).refine((val)=>{
+    const b = (val as any)?.body ?? {};
+    return !!(b.title || b.location || b.date)
+
+},{message: "Provide at least one field to update (title, location, or date)."})
+});
 
 export const eventIdParam = z.object({
     params: z.object({

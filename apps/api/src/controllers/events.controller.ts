@@ -5,24 +5,15 @@ export const eventController = {
     async createEvent(req: Request, res: Response, next: NextFunction){
         try{
             // get info from req.body, pass to service
-            const {title, description, date}= req.body;
-            const result = await eventService.createEvent({title, description, date});
+            const {body}= (req as any).validated ?? {body: req.body};
+            const result = await eventService.createEvent({title: body.title, location: body.location, date: body.date});
             res.status(201).json(result);
         }catch(err){
             next(err); // pass to general error handler
         }
     },
     
-    async getOne(req: Request, res:Response, next: NextFunction){
-        try{
-            const {eventId} = (req as any).params ?? req.params;
-            const result = await eventService.getOne(eventId);
-            res.json(result);
-        }catch(err){
-            next(err)
-        }
-    },
-
+  
     async getEventDetail(req: Request, res: Response, next: NextFunction){
         try{
             const {params}=(req as any).validated ?? {params: req.params};

@@ -3,7 +3,7 @@ import type {Request, Response, NextFunction} from "express";
 // pretend everyone is member untill I implement real auth.js
 
 export function authSession(req: Request, res: Response, next: NextFunction){
-    (req as any).user = (req as any).user ?? {id: "cmfvpy4vu0000os5ummr2xth7", role: "MEMBER"};
+    (req as any).user = (req as any).user ?? {id: "cmfvpy4vu0000os5ummr2xth7", role: "ADMIN"};
     next();
 }
 

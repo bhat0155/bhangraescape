@@ -6,11 +6,11 @@ import { authSession, requiredRole } from "../middlewares/auth";
 
 export const eventRouter = Router();
 
-eventRouter.post("/", (req, res, next)=> validate(req, res, next, createEventBody), eventController.createEvent);
-// eventRouter.get("/:eventId", (req, res, next)=> validate(req, res,next,eventIdParam), eventController.getOne); to be deleted soon
+eventRouter.post("/", authSession, requiredRole(["ADMIN"]), (req, res, next)=> validate(req, res, next, createEventBody), eventController.createEvent);
+// eventRouter.get("/:eventId", (req, res, next)=> validate(req, res,next,eventIdParam), eventController.getOne); //TODO to be deleted soon
 
 // events detail, with user context if logged in
-eventRouter.get("/:eventId", (req, res, next)=> validate(req,res,next, getEventParams), eventController.getEventDetail);
+eventRouter.get("/:eventId", authSession, (req, res, next)=> validate(req,res,next, getEventParams), eventController.getEventDetail);
 
 // toggle interest in event, with user context
 eventRouter.post("/:eventId/interest", authSession, requiredRole(["MEMBER","ADMIN"]), (req, res, next)=> validate(req,res,next,toggleInterestSchema),eventController.toggleInterest);
