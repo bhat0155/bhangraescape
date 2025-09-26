@@ -68,6 +68,8 @@ model User {
   availabilityPreferences AvailabilityPreference[]
   JoinRequests            JoinRequest[]
 
+  accounts Account[]
+
   @@index([role])
 }
 
@@ -87,7 +89,43 @@ model Event {
   availabilities AvailabilityPreference[]
   media          Media[]
   playlist       PlaylistItem[]
+
 }
+
+model Account {
+  // helps the adapter upsert users
+
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+  oauth_token_secret String?  @db.Text
+  oauth_token        String?  @db.Text
+
+  // link to user
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+ @@id([provider, providerAccountId])
+  @@index([userId])
+
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+
 
 model Interest {
   id         String   @id @default(cuid())
