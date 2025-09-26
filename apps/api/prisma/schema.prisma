@@ -58,6 +58,8 @@ model User {
   id          String   @id @default(cuid())
   name        String?
   email       String?  @unique
+   emailVerified DateTime?       
+   image       String? 
   avatarUrl   String?
   description String?
   role        Role     @default(GUEST)
@@ -93,8 +95,8 @@ model Event {
 }
 
 model Account {
-  // helps the adapter upsert users
-
+  id                 String  @id @default(cuid())   
+  userId             String
   type               String
   provider           String
   providerAccountId  String
@@ -108,13 +110,10 @@ model Account {
   oauth_token_secret String?  @db.Text
   oauth_token        String?  @db.Text
 
-  // link to user
-  userId String
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
- @@id([provider, providerAccountId])
+  @@unique([provider, providerAccountId])   
   @@index([userId])
-
 }
 
 model VerificationToken {
