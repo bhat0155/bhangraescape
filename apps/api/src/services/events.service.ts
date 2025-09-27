@@ -44,7 +44,7 @@ export const eventService = {
                 where: {id:eventId},
                 data: {
                     ...(partial.title!== undefined ? {title: partial.title}:{}),
-                     ...(partial.location!== undefined ? {title: partial.location}:{}),
+                     ...(partial.location!== undefined ? {location: partial.location}:{}),
                      ...(partial.date ? {date: partial.date}: {})
                 },
                 select:{

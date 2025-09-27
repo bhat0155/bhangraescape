@@ -4,9 +4,8 @@ import { memberService } from "../services/members.services";
 export const membersController = {
     async list(req: Request, res: Response, next: NextFunction){
         try{
-            const {search} = (req as any).query ?? req.query;
-            const items = await memberService.list({search});
-            res.json({items});
+           const result = await memberService.list();
+           return res.json(result)
         }catch(err){
             next(err)
         }
@@ -14,9 +13,12 @@ export const membersController = {
 
     async get(req: Request, res: Response, next: NextFunction){
         try{
-            const {memberId}= (req as any).params ?? req.params;
-            const data = await memberService.get(memberId);
-            res.json(data);
+            const {params}= (req as any).validated ?? {params: req.params};
+            const user = await memberService.getMember(params.memberId);
+            if(!user){
+                return res.status(404).json({error: "user not found"})
+            }
+            res.json(user);
         }catch(err){
             next(err)
         }
@@ -24,8 +26,8 @@ export const membersController = {
 
     async create(req: Request, res: Response, next: NextFunction){
         try{
-            const {name, avatarUrl, description } = (req as any).body ?? req.body;
-            const data = await memberService.create({name, avatarUrl, description})
+            const {body}  = (req as any).validated ?? {body: req.body};
+            const data = await memberService.createMember(body)
             res.status(201).json(data)
         }catch(err){
             next(err)
@@ -34,9 +36,8 @@ export const membersController = {
 
     async patch(req: Request, res: Response, next: NextFunction){
         try{
-            const {memberId}= (req as any).params ?? req.params;
-            const partial = (req as any).body ?? req.body;
-            const data = await memberService.patch(memberId, partial);
+            const {params, body}=(req as any).validated ?? {params: req.params, body: req.body}
+            const data = await memberService.patch(params.memberId, body);
             res.json(data);
         }catch(err){
             next(err)
@@ -45,8 +46,11 @@ export const membersController = {
 
     async delete(req: Request, res: Response, next: NextFunction){
         try{
-            const {memberId} = (req as any).params ?? req.params;
-            const result = await memberService.remove(memberId);
+            const {params} = (req as any).validated ?? {params:req.params};
+            const result = await memberService.remove(params.memberId);
+             if (!result) {
+                     return res.status(404).json({ error: "user not found" });
+                 }
             res.json(result);
         }catch(err){
             next(err)
