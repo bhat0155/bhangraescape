@@ -1,5 +1,6 @@
+// apps/api/src/middlewares/auth.ts
 import type { Request, Response, NextFunction } from "express";
-import { jwtVerify, JWTPayload } from "jose";
+import { decode } from "@auth/core/jwt";
 
 function getBearer(req: Request): string | null {
   const h = req.headers.authorization || "";
@@ -14,22 +15,30 @@ export async function authSession(req: Request, _res: Response, next: NextFuncti
       return next();
     }
 
-    const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
-    const { payload }: { payload: JWTPayload & { role?: string; name?: string; email?: string } } =
-      await jwtVerify(token, secret);
+    const payload = await decode({
+      token,
+      // MUST be exactly the same as in your Next.js app
+      secret: process.env.NEXTAUTH_SECRET!,
+      salt: "authjs.session-token",           // default Auth.js salt
 
-    const user = {
+    });
+
+    if (!payload) {
+      (req as any).user = null;
+      return next();
+    }
+
+    (req as any).user = {
       id: payload.sub ?? "",
-      name: payload.name ?? undefined,
-      email: payload.email ?? undefined,
-      role: payload.role ?? "GUEST",
+      name: (payload as any).name ?? undefined,
+      email: (payload as any).email ?? undefined,
+      role: (payload as any).role ?? "GUEST",
     };
 
-    (req as any).user = user;
     return next();
   } catch (err) {
     (req as any).user = null;
-    return next(err); 
+    return next(err);
   }
 }
 

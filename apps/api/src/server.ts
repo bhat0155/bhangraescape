@@ -8,6 +8,8 @@ import { eventRouter } from './Routes/events.routes';
 import { memberRouter } from './Routes/members.routes';
 import { contactRouter } from './Routes/contact.route';
 import { joinRouter } from './Routes/join.routes';
+import { devRouter } from './Routes/auth.route';
+
 
 // loads env
 dotenv.config();
@@ -23,6 +25,8 @@ app.use("/api/events", eventRouter);
 app.use("/api/members", memberRouter)
 app.use("/api", contactRouter);
 app.use("/api", joinRouter);
+app.use("/api",devRouter)
+
 
 app.use(errorHandler);
 
