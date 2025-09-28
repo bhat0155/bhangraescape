@@ -7,20 +7,26 @@ export const submitJoinBody = z.object({
   }),
 });
 
-export const listJoinRequestQuery = z.object({
-    query: z.object({
-        status: z.enum(["PENDING", "APPROVED", "REJECTED"])
-    }).optional()
+export const joinTeamIdParam = z.object({
+    id: z.string().min(1, "id is required")
 })
 
-export const reviewJoinParams = z.object({
-    params: z.object({
-        id: z.string().min(1)
-    })
-})
 
 export const reviewJoinBody = z.object({
-    body: z.object({
-        action: z.enum(["APPROVE", "REJECT"])
-    })
+
+        action: z.enum(["APPROVED", "REJECTED"])
+
 })
+
+export const ListPendingJoinRequestsBody = z.object({}); 
+
+export const reviewJoinRequestSchema = z.object({
+    // 'params' property expects the ID from the route path (e.g., /:id)
+    params: joinTeamIdParam,
+    // 'body' property expects the action from the request body
+    body: reviewJoinBody
+});
+
+export type SubmitJoinBodyType = z.infer<typeof submitJoinBody>
+export type JoinTeamIdParamType = z.infer<typeof joinTeamIdParam>
+export type ReviewJoinBodyType = z.infer<typeof reviewJoinBody>
