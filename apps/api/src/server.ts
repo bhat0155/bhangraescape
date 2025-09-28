@@ -9,6 +9,7 @@ import { memberRouter } from './Routes/members.routes';
 import { contactRouter } from './Routes/contact.route';
 import { joinRouter } from './Routes/join.routes';
 import { devRouter } from './Routes/auth.route';
+import {uploadRouter} from './Routes/uploads.route'
 
 
 // loads env
@@ -26,6 +27,7 @@ app.use("/api/members", memberRouter)
 app.use("/api", contactRouter);
 app.use("/api", joinRouter);
 app.use("/api",devRouter)
+app.use("/api/uploads", uploadRouter)
 
 
 app.use(errorHandler);
