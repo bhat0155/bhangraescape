@@ -1,11 +1,11 @@
 import type {Request, Response, NextFunction} from "express";
-import { contactService } from "../services/contact.services";
+import { contactServices } from "../services/contact.services";
 
 export const contactControlller = {
     async submit(req: Request, res: Response, next: NextFunction){
         try{
-            const {name, email, message}= (req as any).body ?? req.body;
-            const result = await contactService.submitMessage({name, email, message})
+            const {body}= (req as any).validated;
+            const result = await contactServices.submitContact(body)
             res.status(202).json(result)
         }catch(err){
             next(err)

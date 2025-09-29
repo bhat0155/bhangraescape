@@ -1,5 +1,10 @@
-export const contactService ={
-    async submitMessage(input: {name: string, email: string, message: string}){
-        return {status :"queued" as const}
+import { submitContactBody } from "../schemas/contacts.schemas";
+
+export const contactServices = {
+     submitContact (data: {name: string, email: string, message: string}){
+        return {
+            status: "success",
+            data
+        }
     }
-}
+};
