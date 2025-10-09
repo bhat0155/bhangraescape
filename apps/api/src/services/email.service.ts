@@ -1,6 +1,7 @@
 
 import { SendEmailCommand } from "@aws-sdk/client-sesv2";
 import { ses } from "../lib/ses";
+import { da } from "zod/v4/locales";
 
 const SES_FROM = process.env.SES_FROM!;
 const ADMIN_NOTIFY = process.env.ADMIN_NOTIFY!; // single or comma-separated
@@ -12,6 +13,7 @@ function toAddresses() {
   return ADMIN_NOTIFY.split(",").map(s => s.trim()).filter(Boolean);
 }
 
+// function to send emails for join-team
 export async function sendContactUsEmail(input: {
   name: string;
   email: string;
@@ -63,4 +65,34 @@ function escapeHtml(s: string) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+// function to send emails for join-team
+export async function sendJoinRequestEmail(params: {
+    name?: string | null;
+    email: string
+}){
+    const {name, email} = params;
+    const to = ADMIN_NOTIFY.split(",").map(s => s.trim()).filter(Boolean);
+    const subject = "New Join Team Request";
+    const bodyText = `${email} wants to join the team ${name? `(name: ${name})`:""}.`
+    const bodyHtml = `
+    <p><strong>${email}</strong> wants to join the team${name ? ` (name: ${name})` : ""}.</p>
+  `;
+
+  const cmd = new SendEmailCommand({
+    FromEmailAddress: SES_FROM,
+    Destination: {ToAddresses: to},
+    Content: {
+        Simple: {
+            Subject: {Data: subject},
+            Body: {
+                Text: {Data: bodyText},
+                Html: {Data: bodyHtml}
+            }
+        }
+    }
+  })
+
+  await ses.send(cmd)
 }

@@ -1,5 +1,6 @@
 import {prisma} from "../lib/prisma";
-import {ReviewJoinBodyType, SubmitJoinBodyType, JoinTeamIdParamType } from "../schemas/join.schemas"
+import {ReviewJoinBodyType, SubmitJoinBodyType, JoinTeamIdParamType } from "../schemas/join.schemas";
+import { sendJoinRequestEmail } from "./email.service";
 
 const joinSelect = {
     id: true,
@@ -40,6 +41,14 @@ export const joinService = {
             select: joinSelect
         })
         // SES admins can be triggered here
+
+        try{
+            await sendJoinRequestEmail({name, email})
+        }catch(err){
+            const e: any = new Error("Failed to send email to admins");
+            e.status = 500;
+            throw e;
+        }
         return created;
     },
 
