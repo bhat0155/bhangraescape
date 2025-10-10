@@ -77,7 +77,18 @@ export const eventController = {
         }catch(err){
             next(err)
         }
-    }
+    },
 
+    async list(req: Request, res: Response, next: NextFunction){
+        try{
+            const query = (req as any).validated?.query ?? {};
+            const items = await eventService.list(query);
+            // caching
+            res.setHeader("Cache-Control", "public, s-maxage=60");
+            res.status(200).json({ items });
+        }catch(err){
+            next(err)
+        }
+    }
 
 }

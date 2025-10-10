@@ -1,6 +1,6 @@
 import {Router} from "express";
 import { validate } from "../middlewares/validate";
-import { createEventBody, toggleInterestSchema, getEventParams, getAvailabilityParams, setAvailabilityParams, eventIdParam, patchEventBodyAndParams, deleteEventParams } from "../schemas/events.schemas";
+import { createEventBody, toggleInterestSchema, getEventParams, getAvailabilityParams, setAvailabilityParams, listEventQuery, patchEventBodyAndParams, deleteEventParams } from "../schemas/events.schemas";
 import { eventController } from "../controllers/events.controller";
 import { authSession, requiredRole } from "../middlewares/auth";
 
@@ -27,3 +27,6 @@ eventRouter.get("/:eventId/availability",authSession, (req,res,next)=> validate(
 // set availability
 eventRouter.post("/:eventId/availability",authSession,
   requiredRole(["MEMBER","ADMIN"]), (req,res,next)=>validate(req,res,next,setAvailabilityParams), eventController.setAvailability)
+
+// get all events
+eventRouter.get("/", (req,res,next)=>validate(req,res,next,listEventQuery),  eventController.list);
