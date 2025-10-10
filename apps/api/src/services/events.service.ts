@@ -1,6 +1,8 @@
 import { prisma } from "../lib/prisma"
 import { Weekday } from "@prisma/client"
 const weekDayOrder : Weekday[]= ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+import { listEventQueryType } from "../schemas/events.schemas";
+import { lte, object } from "zod";
 const emptyTallies =()=>{
     return {MON: 0, TUE: 0, WED: 0, THU: 0, FRI: 0, SAT: 0, SUN: 0,};
 }
@@ -11,6 +13,14 @@ function computeTopDays(tallies: Record<string, number>){
         return {weekday: weekday as Weekday, count}
     });
 }
+
+const eventCardSelect = {
+    id: true,
+    title: true,
+    coverUrl: true,
+    date: true,
+    location: true
+} as const
 
 export const eventService = {
     async createEvent(input: {title: string, location: string, date: string}){
@@ -32,12 +42,6 @@ export const eventService = {
         })
         return created;
     },
-
-    //TODO to be deleted soon
-    // async getOne(_eventId: string){
-    //     return {ok: true}
-    // },
-
     async patchEvent(eventId: string, partial :{title? : string, location?: string, date?: Date }){
         try{
             const updated = await prisma.event.update({
@@ -302,6 +306,50 @@ export const eventService = {
             }
             throw err;
         }
+    },
+
+    async list(query: listEventQueryType){
+        const {status = "all", search} = query ?? {};
+        const now = new Date();
+
+        // date filter
+        let dateWhere: Record<string, any>|undefined;
+        if(status === "upcoming"){
+            dateWhere = {gt: now}
+        }
+        if(status === "past"){
+             dateWhere = {lte: now}
+        }
+
+        // search feature
+        let searchWhere: Record<string, any>|undefined;
+
+        if(search && search.trim().length>0){
+            searchWhere = {
+                title: {
+                    contains: search.trim(),
+                    mode: "insensitive"
+                }
+            }
+        }
+
+        // combining where clause
+       const where: any = {};
+    if (dateWhere) where.date = dateWhere;
+    if (searchWhere) Object.assign(where, searchWhere);
+
+    // Order strategy
+    const orderBy =
+      status === "upcoming"
+        ? { date: "asc" }
+        : { date: "desc" }; // past/all → latest first
+
+    return prisma.event.findMany({
+      where,
+      select: eventCardSelect,
+      orderBy,
+    });
+
     }
 
 

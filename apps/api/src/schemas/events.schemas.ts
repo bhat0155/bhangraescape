@@ -68,7 +68,7 @@ export const setAvailabilityParams = z.object({
 
 export const listEventQuery = z.object({
     query: z.object({
-        status: z.enum(["all", "upcomming", "past"]).optional().default("all"),
+        status: z.enum(["all", "upcoming", "past"]).optional().default("all"),
         search: z.string().trim().max(120).optional()
     })
 })
