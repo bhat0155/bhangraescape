@@ -66,5 +66,13 @@ export const setAvailabilityParams = z.object({
     })
 })
 
+export const listEventQuery = z.object({
+    query: z.object({
+        status: z.enum(["all", "upcomming", "past"]).optional().default("all"),
+        search: z.string().trim().max(120).optional()
+    })
+})
+
 export type getEventParamsInput = z.infer<typeof getEventParams>;
 export type toggleInterestInput = z.infer<typeof toggleInterestSchema>;
+export type listEventQueryType = z.infer<typeof listEventQuery>["query"]
