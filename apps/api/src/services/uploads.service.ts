@@ -1,6 +1,7 @@
 import { s3, S3_BUCKET } from "../lib/s3";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { nanoid } from "nanoid";
+import { prisma } from "../lib/prisma";
 
 type PresignOpts = {
   prefix: "avatars" | "events";        // keep it constrained
@@ -10,6 +11,12 @@ type PresignOpts = {
   userId: string;                       // to namespace keys by user
 };
 
+type RegisterMediaInput = {
+  eventId: string;
+  fileKey: string;
+  type: "IMAGE" | "VIDEO";
+  title?: string;
+}
 export async function presignUpload({
   prefix,
   contentType,
@@ -41,5 +48,28 @@ export async function presignUpload({
   // Public URL you can store in DB (your bucket is public)
   const publicUrl = `https://${S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
 
-  return { url, fields, key, publicUrl, expiresIn: 60 };
+  return { url, fields, key, publicUrl, expiresIn: 300 };
+}
+
+export async function registerMedia({eventId, fileKey, type, title}: RegisterMediaInput){
+    const publicUrl = `https://${S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
+    const media = await prisma.media.create({
+      data:{
+        eventId,
+        type,
+        source: "S3",
+        url: publicUrl,
+        title: title ?? null
+      },
+      select: {
+      id: true,
+      eventId: true,
+      type: true,
+      source: true,
+      url: true,
+      title: true,
+      createdAt: true,
+    },
+    })
+    return media;
 }

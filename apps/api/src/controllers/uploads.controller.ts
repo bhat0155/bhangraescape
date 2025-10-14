@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
-import { presignUpload } from "../services/uploads.service";
+import { presignUpload, registerMedia } from "../services/uploads.service";
+
 
 export async function presigned(req: Request, res: Response, next: NextFunction){
     try{
@@ -18,6 +19,21 @@ export async function presigned(req: Request, res: Response, next: NextFunction)
         })
     res.json(data);
 
+    }catch(err){
+        next(err)
+    }
+}
+
+export async function registerEventMedia(req: Request, res: Response, next: NextFunction){
+    try{
+        const {params, body} = (req as any).validated ?? {params: req.params, body: req.body};
+        const media = await registerMedia({
+            eventId: params.eventId,
+            fileKey: body.fileKey,
+            type: body.type,
+            title: body.title
+        })
+        res.status(201).json(media)
     }catch(err){
         next(err)
     }

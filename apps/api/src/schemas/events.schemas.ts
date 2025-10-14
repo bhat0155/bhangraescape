@@ -1,4 +1,4 @@
-import {z} from 'zod';
+import {file, z} from 'zod';
 
 export const createEventBody = z.object({
     body: z.object({
@@ -73,6 +73,38 @@ export const listEventQuery = z.object({
     })
 })
 
+// uploading to s3
+export const presignMediaBody = z.object({
+    params: z.object({
+        eventId: z.string().min(1)
+    }),
+    body: z.object({
+        prefix: z.enum(["avatars", "events"]),
+        contentType: z.string().min(1),
+        ext: z.string().regex(/^[a-z0-9.]+$/i).optional(), // jpg, png, mp4...
+    })
+})
+
+export const presignAvatarBody = z.object({
+  body: z.object({
+    contentType: z.string().min(1),           // e.g. image/jpeg
+    ext: z.string().regex(/^[a-z0-9.]+$/i).optional(), // jpg, png...
+  }),
+});
+
+export const registerEventMediaBody = z.object({
+    params: z.object({
+        eventId: z.string().min(1)
+    }),
+    body: z.object({
+        fileKey: z.string().min(1),
+        type: z.enum(["IMAGE","VIDEO"]),
+        title: z.string().trim().min(1).optional().nullable()
+    })
+})
+
 export type getEventParamsInput = z.infer<typeof getEventParams>;
 export type toggleInterestInput = z.infer<typeof toggleInterestSchema>;
-export type listEventQueryType = z.infer<typeof listEventQuery>["query"]
+export type listEventQueryType = z.infer<typeof listEventQuery>["query"];
+export type PresignEventMediaBody = z.infer<typeof presignMediaBody>
+export type RegisterEventMediaBody = z.infer<typeof registerEventMediaBody>
