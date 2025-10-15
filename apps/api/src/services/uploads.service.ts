@@ -1,8 +1,9 @@
 import { s3, S3_BUCKET } from "../lib/s3";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { nanoid } from "nanoid";
 import { prisma } from "../lib/prisma";
-import { th } from "zod/v4/locales";
+
 
 const mediaSelect = {
   id: true,
@@ -122,4 +123,46 @@ export async function patchMediaService(mediaId: string, partial: {title?: strin
       select: mediaSelect
     })
   
+}
+
+function keyFromUrl(url: string){
+  const region = process.env.AWS_REGION;
+ const prefix = `https://${S3_BUCKET}.s3.${region}.amazonaws.com/`;
+ if(!url.startsWith(prefix)){
+  const e: any = new Error("stored media url is not public s3 url");
+  e.status = 500;
+  throw e;
+ }
+ return url.slice(prefix.length);
+
+}
+
+export async function deleteMediaService(mediaId: string){
+  // get the media record
+  const media = await prisma.media.findUnique({
+    where: {id: mediaId},
+    select: {id: true, url: true}
+  })
+  if(!media){
+    const e: any = new Error("Media not found");
+    e.status = 404;
+    throw e;
+  }
+  // remove from s3
+  const key = keyFromUrl(media.url);
+  try{
+        await s3.send(new DeleteObjectCommand({ Bucket: S3_BUCKET, Key: key }));
+
+  }catch(err){
+    const e:any = new Error(`Failed to delete media from storage", ${err}`);
+    e.status = 502;
+    throw e;
+  }
+
+  // finally remove from db
+
+  await prisma.media.delete({
+    where: {id: mediaId}
+  })
+  return {deleted: true, deletedId: mediaId}
 }

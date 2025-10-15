@@ -1,7 +1,7 @@
 import { Router } from "express"
-import { listEventMedia, presigned, registerEventMedia, patchEventMedia } from "../controllers/uploads.controller"
+import { listEventMedia, presigned, registerEventMedia, patchEventMedia, removeEventMedia } from "../controllers/uploads.controller"
 import { authSession, requiredRole } from "../middlewares/auth"
-import { eventIdParam, presignMediaBody, registerEventMediaBody, patchMediaBodyAndParams } from "../schemas/events.schemas";
+import { eventIdParam, presignMediaBody, registerEventMediaBody, patchMediaBodyAndParams, mediaIdParam } from "../schemas/events.schemas";
 import { validate } from "../middlewares/validate";
 
 export const uploadRouter = Router();
@@ -20,3 +20,6 @@ uploadRouter.get("/:eventId/media", (req,res,next)=> validate(req,res,next, even
 
 // path media
 uploadRouter.patch("/media/:mediaId", authSession, requiredRole(["ADMIN"]),(req,res,next)=> validate(req,res,next, patchMediaBodyAndParams), patchEventMedia);
+
+// delete media
+uploadRouter.delete("/media/:mediaId", authSession, requiredRole(["ADMIN"]),(req,res,next)=> validate(req,res,next, mediaIdParam), removeEventMedia)

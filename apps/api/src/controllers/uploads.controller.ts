@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { presignUpload, registerMedia } from "../services/uploads.service";
+import { deleteMediaService, presignUpload, registerMedia } from "../services/uploads.service";
 import {listMediaByEventServices, patchMediaService} from "../services/uploads.service"
 
 
@@ -58,6 +58,16 @@ export async function patchEventMedia(req: Request, res: Response, next: NextFun
         const {body, params}=(req as any).validated ?? {params: req.params, body: req.body};
         const updated = await patchMediaService(params.mediaId, body);
         res.json(updated)
+    }catch(err){
+        next(err)
+    }
+}
+
+export async function removeEventMedia(req: Request, res: Response, next: NextFunction){
+    try{
+        const {mediaId}=(req as any).validated.params ?? req.params;
+        const result = await deleteMediaService(mediaId);
+        return res.status(204).send(); 
     }catch(err){
         next(err)
     }

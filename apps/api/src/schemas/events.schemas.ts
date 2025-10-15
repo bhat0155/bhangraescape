@@ -41,6 +41,12 @@ export const eventIdParam = z.object({
     })
 })
 
+export const mediaIdParam = z.object({
+    params: z.object({
+        mediaId: z.string().min(1)
+    })
+})
+
 export const getEventParams = z.object({
     params: z.object({
         eventId: z.string().min(1)
