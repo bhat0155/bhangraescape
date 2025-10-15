@@ -11,6 +11,7 @@ import { joinRouter } from './Routes/join.routes';
 import { devRouter } from './Routes/auth.route';
 import {uploadRouter} from './Routes/uploads.route'
 import { playlistRouter } from './Routes/playlist.routes';
+import {finalMixRouter} from './Routes/finalmix.route';
 
 
 // loads env
@@ -30,6 +31,7 @@ app.use("/api", joinRouter);
 app.use("/api",devRouter)
 app.use("/api/uploads", uploadRouter)
 app.use("/api", playlistRouter)
+app.use("/api", finalMixRouter)
 
 
 app.use(errorHandler);
