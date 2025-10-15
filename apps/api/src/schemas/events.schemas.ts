@@ -1,3 +1,4 @@
+import path from 'path';
 import {file, z} from 'zod';
 
 export const createEventBody = z.object({
@@ -102,6 +103,20 @@ export const registerEventMediaBody = z.object({
         title: z.string().trim().min(1).optional().nullable()
     })
 })
+
+export const patchMediaBodyAndParams = z
+  .object({
+    params: z.object({ mediaId: z.string().min(1) }),
+    body: z.object({
+      title: z.string().trim().min(1).max(120).optional(),
+      type: z.enum(["IMAGE", "VIDEO"]).optional(),
+    }),
+  })
+  .refine(
+    (val) => val.body.title !== undefined || val.body.type !== undefined,
+    { message: "Provide at least one field to update (title or type).", path: ["body"] },
+  );
+
 
 export type getEventParamsInput = z.infer<typeof getEventParams>;
 export type toggleInterestInput = z.infer<typeof toggleInterestSchema>;

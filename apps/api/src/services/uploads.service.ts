@@ -2,6 +2,7 @@ import { s3, S3_BUCKET } from "../lib/s3";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { nanoid } from "nanoid";
 import { prisma } from "../lib/prisma";
+import { th } from "zod/v4/locales";
 
 const mediaSelect = {
   id: true,
@@ -90,4 +91,35 @@ export async function listMediaByEventServices(eventId: string){
     select: mediaSelect,
     orderBy: {createdAt: "desc"}
   })
+}
+
+export async function patchMediaService(mediaId: string, partial: {title?: string, type?: "IMAGE" | "VIDEO"}){
+  // guard: only allow title and type to be updated
+  const data: Record<string, any> ={}
+    if(partial.title !== undefined) data.title = partial.title ?? null;
+    if(partial.type !== undefined) data.type = partial.type;
+
+    if (Object.keys(data).length === 0){
+      const e: any = new Error("No valid fields to update")
+        e.status = 422;
+        throw e;
+    }
+
+    const {count}=await prisma.media.updateMany({
+      where: {id: mediaId},
+      data
+    })
+
+    if(count === 0){
+      const e: any = new Error("Media not found");
+      e.status = 404;
+      throw e;
+    }
+
+    // return the updated media
+    return await prisma.media.findUnique({
+      where: {id: mediaId},
+      select: mediaSelect
+    })
+  
 }
