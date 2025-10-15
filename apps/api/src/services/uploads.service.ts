@@ -3,6 +3,16 @@ import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { nanoid } from "nanoid";
 import { prisma } from "../lib/prisma";
 
+const mediaSelect = {
+  id: true,
+  eventId: true,
+  type: true,       // "IMAGE" | "VIDEO"
+  source: true,     // "S3"
+  url: true,
+  title: true,
+  createdAt: true,
+} as const;
+
 type PresignOpts = {
   prefix: "avatars" | "events";        // keep it constrained
   contentType: string;                  // e.g. "image/jpeg" or "image/png"
@@ -72,4 +82,12 @@ export async function registerMedia({eventId, fileKey, type, title}: RegisterMed
     },
     })
     return media;
+}
+
+export async function listMediaByEventServices(eventId: string){
+  return await prisma.media.findMany({
+    where: {eventId},
+    select: mediaSelect,
+    orderBy: {createdAt: "desc"}
+  })
 }

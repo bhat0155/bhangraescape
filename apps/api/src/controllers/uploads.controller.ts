@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { presignUpload, registerMedia } from "../services/uploads.service";
+import {listMediaByEventServices} from "../services/uploads.service"
 
 
 export async function presigned(req: Request, res: Response, next: NextFunction){
@@ -34,6 +35,19 @@ export async function registerEventMedia(req: Request, res: Response, next: Next
             title: body.title
         })
         res.status(201).json(media)
+    }catch(err){
+        next(err)
+    }
+}
+
+// list all media
+export async function listEventMedia(req: Request, res: Response, next: NextFunction){
+    try{
+        const {eventId}=(req as any).validated.params ?? req.params;
+        const items = await listMediaByEventServices(eventId);
+        // cache
+        res.setHeader("Cache-Control", "public, max-age=60");
+        return res.json({items})
     }catch(err){
         next(err)
     }

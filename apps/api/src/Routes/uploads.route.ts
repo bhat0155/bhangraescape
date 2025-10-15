@@ -1,7 +1,7 @@
 import { Router } from "express"
-import { presigned, registerEventMedia } from "../controllers/uploads.controller"
+import { listEventMedia, presigned, registerEventMedia } from "../controllers/uploads.controller"
 import { authSession, requiredRole } from "../middlewares/auth"
-import { presignMediaBody, registerEventMediaBody } from "../schemas/events.schemas";
+import { eventIdParam, presignMediaBody, registerEventMediaBody } from "../schemas/events.schemas";
 import { validate } from "../middlewares/validate";
 
 export const uploadRouter = Router();
@@ -14,3 +14,7 @@ uploadRouter.post("/:eventId/media/presign", authSession, requiredRole(["ADMIN"]
 
 // registering uploaded file to db
 uploadRouter.post("/:eventId/media", authSession, requiredRole(["ADMIN"]), (req,res,next)=> validate(req,res,next, registerEventMediaBody),registerEventMedia);
+
+// list all media for an event
+uploadRouter.get("/:eventId/media", (req,res,next)=> validate(req,res,next, eventIdParam),listEventMedia);
+
