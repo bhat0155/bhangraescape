@@ -10,6 +10,7 @@ import { contactRouter } from './Routes/contact.route';
 import { joinRouter } from './Routes/join.routes';
 import { devRouter } from './Routes/auth.route';
 import {uploadRouter} from './Routes/uploads.route'
+import { playlistRouter } from './Routes/playlist.routes';
 
 
 // loads env
@@ -28,6 +29,7 @@ app.use("/api", contactRouter);
 app.use("/api", joinRouter);
 app.use("/api",devRouter)
 app.use("/api/uploads", uploadRouter)
+app.use("/api", playlistRouter)
 
 
 app.use(errorHandler);
