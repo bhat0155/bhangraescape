@@ -40,3 +40,5 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 - Frontend origin = http://localhost:3000
 - Backend CORS: origin includes frontend, credentials enabled
 - Day 1 uses only public endpoints; protected calls come Day 2+
+- “Day-1 delivers public, read-only Events browsing (list + detail) rendered on the server. No protected actions yet.”
+

@@ -1,33 +1,42 @@
+// src/components/authButtons.tsx
 "use client";
 
 import { useSession, signIn, signOut } from "next-auth/react";
 
+export default function AuthButtons() {
+  const { data: session, status } = useSession();
 
-export default function AuthButtons(){
-    const {data: session, status}= useSession();
+  if (status === "loading") {
+    return <span className="loading loading-spinner loading-sm" aria-label="Loading" />;
+  }
 
-    if (status == "loading") return <span>Loading</span>;
-
-    if(!session){
-        return (
-            <button className="px-3 py-2 rounded bg-black text-white" onClick={()=>signIn("google")}>Sign in with google</button>
-        )
-    }
-
+  if (!session) {
     return (
-        <div className="flex items-center gap-3">
-            <span className="text-sm">
-                Hi, {session.user?.name}, your email is {session.user?.email} and id is {session.user?.id} and role is {session.user?.role}
-            </span>
-            <button
-        className="px-3 py-2 rounded border"
-        onClick={() => signOut()}
+      <button
+        className="btn btn-sm btn-neutral whitespace-nowrap"
+        onClick={() => signIn("google")}
       >
-        Sign out
+        Login
       </button>
-        </div>
-    )
+    );
+  }
 
-    
+  const name = session.user?.name ?? "User";
+  const initial = name.slice(0, 1).toUpperCase();
 
+  return (
+    <div className="flex items-center gap-2 whitespace-nowrap">
+      {/* Small user pill (hide the name on small screens to save space) */}
+      <span className="badge badge-ghost px-2">
+        <span className="mr-1 inline-grid place-items-center w-5 h-5 rounded-full bg-base-300 text-xs">
+          {initial}
+        </span>
+        {/* <span className="hidden md:inline-block max-w-[160px] truncate">Hi, {name}</span> */}
+      </span>
+
+      <button className="btn btn-sm btn-outline" onClick={() => signOut()}>
+        Logout
+      </button>
+    </div>
+  );
 }
