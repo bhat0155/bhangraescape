@@ -28,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
 <html lang="en" data-theme="cupcake">
-      <body className="min-h-dvh flex flex-col">
+       <body className="min-h-dvh flex flex-col bg-base-100 text-base-content">
     <a href="#main"className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 btn btn-sm"
 > Skip to main content</a>
 <SessionClient>
