@@ -29,10 +29,11 @@ export default function Navbar() {
           </div>
 
           {/* CENTER (hidden on xs for now) */}
-          <nav className="hidden sm:flex gap-1 justify-self-center whitespace-nowrap">
+          <nav className="hidden sm:flex gap-5 justify-self-center whitespace-nowrap">
             <NavLink href="/">Home</NavLink>
             <NavLink href="/events">Events</NavLink>
             <NavLink href="/members">Members</NavLink>
+            <NavLink href="/about">About</NavLink>
             <NavLink href="/contact">Contact</NavLink>
           </nav>
 
