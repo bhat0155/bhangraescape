@@ -1,9 +1,14 @@
 // apps/web/bhangraescape/app/api/auth/[...nextauth]/route.ts
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { prisma } from "../../../../../lib/prisma";
+
+
 
 export const { handlers: { GET, POST }, auth } = NextAuth({
   // IMPORTANT: pass your env vars to the provider
+  adapter: PrismaAdapter(prisma),
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,        // from .env.local
@@ -16,11 +21,14 @@ export const { handlers: { GET, POST }, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       // first login: user is defined → copy things into the token
-      if (user) {
-        // In v5, user.id is only present when you add an adapter; for now, leave undefined
-        // We'll still add a default role so the UI can read it.
-        (token as any).role = (token as any).role ?? "GUEST";
+       if (user) {
+      // Fetch role from DB if needed (Prisma) or hardcode for your account
+      if (user.email === "ekamsingh643@gmail.com") {
+        token.role = "ADMIN";  
+      } else {
+        token.role = "GUEST";
       }
+    }
       return token;
     },
     async session({ session, token }) {
