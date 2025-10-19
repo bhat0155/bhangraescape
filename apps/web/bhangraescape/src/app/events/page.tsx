@@ -1,4 +1,5 @@
 import EventCard from "../components/EventCard";
+import { getRelativeTime } from "../lib/time";
 
 type EventSummary = {
     id: string;

@@ -3,10 +3,11 @@ import { EventSummary } from "../types/events";
 import { formatDate } from "../lib/format";
 
 type EventCardProps = {
-    event: EventSummary
+    event: EventSummary,
+    metaText?: string
 }
 
-export default function EventCard({event}: EventCardProps) {
+export default function EventCard({event, metaText}: EventCardProps) {
     return(
          <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300">
                                 <div className="card-body p-4">
@@ -36,6 +37,7 @@ export default function EventCard({event}: EventCardProps) {
                                             View Details
                                         </Link>
                                     </div>
+                                    {metaText &&  <p className="text-sm opacity-80">{metaText}</p>}
                                 </div>
                             </div>
     )
