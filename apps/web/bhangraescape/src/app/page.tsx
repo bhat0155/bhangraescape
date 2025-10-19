@@ -1,8 +1,8 @@
-// src/app/page.tsx
 import EventCard from "./components/EventCard";
 import { getRelativeTime } from "./lib/time";
-import { EventSummary } from "./types/events";
+import { EventSummary } from "./types/events"; // Corrected type import syntax
 import Link from "next/link";
+import Image from "next/image";
 
 type EventListResponse = {
   items: EventSummary[];
@@ -30,6 +30,44 @@ export default async function HomePage() {
   return (
     <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-10">
       {/* (Optional) Hero goes above this later */}
+      {/* FIX: Changed layout to a two-column grid for desktop (md:grid-cols-2) */}
+      <section className="min-h-[60vh] rounded-xl overflow-hidden bg-base-200 relative grid grid-cols-1 md:grid-cols-2">
+  
+  {/* Left Column: Image (Takes up 1/2 width on medium screens and up) */}
+  <div className="relative h-full min-h-[40vh] md:min-h-[60vh]">
+    <Image
+      src="/images/Hero2.jpeg"
+      alt="BhangraEscape hero banner"
+      fill
+      priority
+      // FIX: Changed back to object-cover to fill the entire column space
+      className="object-cover object-center" 
+      sizes="(max-width: 768px) 100vw, 50vw" // Image takes up 50% screen width on large screens
+    />
+    {/* Dark overlay over the image for contrast/style */}
+    <div className="absolute inset-0 bg-black/30" />
+  </div>
+
+  {/* Right Column: Text Content (Takes up 1/2 width on medium screens and up) */}
+  <div className="p-8 md:p-12 flex flex-col justify-center items-start text-base-content bg-base-200">
+    <div className="max-w-xl space-y-4">
+     <p className="text-sm font-semibold uppercase tracking-widest text-primary">
+  Living through <span className="text-3xl font-extrabold">ਭੰਗੜਾ</span> 
+</p>
+      <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight">
+        Welcome to BhangraScape
+      </h1>
+      <p className="opacity-90">
+        Experience the rhythm of traditional Bhangra.
+      </p>
+      <div className="pt-2 text-white">
+        <Link href="/join" className="btn btn-primary">
+          Join Our Team
+        </Link>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* Events preview section */}
       <section className="space-y-4">
