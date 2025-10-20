@@ -3,6 +3,7 @@ import { getRelativeTime } from "./lib/time";
 import { EventSummary } from "./types/events"; // Corrected type import syntax
 import Link from "next/link";
 import Image from "next/image";
+import { REELS } from "./data/reels";
 
 type EventListResponse = {
   items: EventSummary[];
@@ -116,6 +117,53 @@ export default async function HomePage() {
           </div>
         )}
       </section>
+<section className="space-y-4">
+  <header className="flex items-end justify-between gap-2">
+    <div>
+      <h2 className="text-2xl sm:text-3xl font-bold">Videos &amp; Reels</h2>
+      <p className="opacity-70">Watch our latest clips.</p>
+    </div>
+  </header>
+
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {REELS.map((r) => (
+      <article
+        key={r.slug}
+        className="card bg-base-100 shadow hover:shadow-lg transition-shadow overflow-hidden"
+      >
+        {/* Make the whole card clickable */}
+        <Link
+          href={`/reels/${r.slug}`}
+          aria-label={`Watch ${r.title}`}
+          className="block group"
+        >
+          {/* Video preview */}
+          <figure className="relative w-full h-48 bg-base-200">
+            <video
+              src={r.src}
+              muted
+              loop
+              autoPlay
+              playsInline
+              preload="metadata"
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            />
+            {/* Subtle hover overlay with CTA */}
+            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity grid place-items-center">
+              <span className="btn btn-primary btn-sm">Watch</span>
+            </div>
+          </figure>
+
+          {/* Title / meta */}
+          <div className="card-body p-4">
+            <h3 className="card-title text-lg">{r.title}</h3>
+            <p className="text-sm opacity-70">Tap to open full player</p>
+          </div>
+        </Link>
+      </article>
+    ))}
+  </div>
+</section>
     </div>
   );
 }
