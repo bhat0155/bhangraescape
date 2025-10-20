@@ -164,6 +164,46 @@ export default async function HomePage() {
     ))}
   </div>
 </section>
+{/* Map */}
+
+<section className="space-y-4">
+  <header className="flex items-end justify-between gap-2">
+    <div>
+      <h2 className="text-2xl sm:text-3xl font-bold">Find Us</h2>
+    </div>
+  </header>
+
+  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <p className="font-medium"> 2140 Baseline Road, 522 apartment, Ottawa, K2C 3V9</p>
+    </div>
+
+    <a
+      href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
+        "2140 Baseline Road , 522 apartment, Ottawa, K2C 3V9"
+      )}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="btn btn-primary btn-sm w-full sm:w-auto text-white"
+    >
+      Get Directions
+    </a>
+  </div>
+
+  {/* Map Embed */}
+  <div className="rounded-xl overflow-hidden shadow bg-base-100">
+    <iframe
+      title="Map to our location"
+      src={`https://www.google.com/maps?q=${encodeURIComponent(
+        "2140 Baseline Road , 522 apartment, Ottawa, K2C 3V9"
+      )}&output=embed`}
+      loading="lazy"
+      referrerPolicy="no-referrer-when-downgrade"
+      className="w-full h-64 sm:h-80"
+    />
+  </div>
+</section>
+
     </div>
   );
 }
