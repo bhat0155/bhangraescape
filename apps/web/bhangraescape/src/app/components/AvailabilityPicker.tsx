@@ -46,24 +46,18 @@ export default function AvailabilityPicker({
     });
   }
 
-  // Memoized string for selected days display
-  const selectedList = useMemo(
-    () => Array.from(selected).join(", ") || "—",
-    [selected]
-  );
-
-  // Memoized string for Top Days display (NEW)
+  // Memoized string for Top Days display
   const topDaysInfo = useMemo(() => {
     if (topDays.length === 0) return "No availability set by members yet.";
     if (topDays.length === 1) return `Top day: ${topDays[0].weekday} (${topDays[0].count} votes)`;
     
     // Display the top two days
     const [a, b] = topDays;
-    return `Top days: ${a.weekday} (${a.count}), ${b.weekday} (${b.count})`;
+    return `${a.weekday} (${a.count}), ${b.weekday} (${b.count})`;
   }, [topDays]);
 
-  // Custom styles for larger, better-padded chips
-  const chipBaseClasses = "transition-all duration-200 rounded-lg text-sm font-semibold shadow-sm";
+  // Custom styles for smaller, less jarring chips
+  const chipBaseClasses = "transition-all duration-200 rounded-md text-xs font-semibold shadow-sm";
   
   async function saveAvailability(){
     setSaving(true); // Start loading state
@@ -106,7 +100,8 @@ export default function AvailabilityPicker({
   }
 
   return (
-    <div className="space-y-6 relative group p-1">
+    // Reduced outer spacing and removed outer padding
+    <div className="space-y-3 relative group">
       
       {/* 🚫 Guest Overlay: Appears only on hover for guests to show message */}
       {isGuest && (
@@ -124,10 +119,11 @@ export default function AvailabilityPicker({
       )}
 
       {/* --- Chips Container & Save Button (Combined and Aligned) --- */}
-      <div className="flex flex-wrap items-center gap-4 border-b border-gray-200 pb-4">
+      {/* Reduced bottom padding */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-gray-100 pb-3">
         
         {/* Chips */}
-        <div className="flex flex-wrap gap-2"> 
+        <div className="flex flex-wrap gap-1.5"> 
           {WEEKDAYS.map((d) => {
             const isOn = selected.has(d);
             return (
@@ -138,7 +134,8 @@ export default function AvailabilityPicker({
                 disabled={disabled}
                 title={disabled ? "You can’t change availability right now." : ""}
                 className={[
-                  "px-4 py-2 border", // Custom increased padding
+                  // Reduced padding and font size for chips
+                  "px-3 py-1.5 border", 
                   chipBaseClasses,
                   isGuest ? "opacity-60" : "", 
                   isOn
@@ -155,12 +152,13 @@ export default function AvailabilityPicker({
           })}
         </div>
 
-        {/* Save Button (Now next to chips, pushed to the right with ml-auto) */}
+        {/* Save Button (Smaller and pushed to the right) */}
         <button
           type="button"
           disabled={disabled}
           className={[
-            "ml-auto px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200",
+            // Reduced padding and font size for button
+            "ml-auto px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200",
             "shadow-md",
             disabled ? "bg-gray-400 text-gray-700 cursor-not-allowed opacity-70" : "bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-500/50",
           ].join(" ")}
@@ -174,17 +172,20 @@ export default function AvailabilityPicker({
       </div>
 
       {/* --- Weekly Tallies Grid (Smaller/Less Significant) --- */}
-      <div className="pt-4 border-t border-gray-200 opacity-80">
-        <h3 className="text-sm font-semibold mb-2 text-gray-600">Availability Tally (All Members)</h3>
+      {/* Reduced top padding and opacity */}
+      <div className="pt-2 border-t border-gray-100 opacity-70">
+        {/* Smaller heading */}
+        <h3 className="text-xs font-semibold mb-1 text-gray-600">Availability Tally</h3>
         <div className="grid grid-cols-7 gap-1 text-center text-xs">
           {WEEKDAYS.map((d) => (
             <div 
               key={d} 
-              className="rounded-md py-1.5 transition-colors duration-200"
+              className="rounded-md py-1 transition-colors duration-200"
               style={{ backgroundColor: tallies[d] > 0 ? '#e0f2f1' : '#f7f7f7' }} // Lighter green/gray
             >
               <div className="font-medium text-gray-600 text-[10px]">{d}</div>
-              <div className="text-base font-extrabold" style={{ color: tallies[d] > 0 ? '#00838f' : '#888' }}>
+              {/* Reduced count size */}
+              <div className="text-sm font-bold" style={{ color: tallies[d] > 0 ? '#00838f' : '#888' }}>
                 {tallies[d] ?? 0}
               </div>
             </div>
@@ -192,11 +193,14 @@ export default function AvailabilityPicker({
         </div>
       </div>
 
-      {/* --- Highlighted Top Days Readout (Primary Insight, Placed last) --- */}
-      <div className="pt-4">
-          <h3 className="text-base font-semibold mb-2 text-gray-700">Recommended Days</h3>
-          <div className="bg-yellow-50 p-3 rounded-xl border-2 border-yellow-300 shadow-lg">
-              <span className="text-lg text-gray-900 font-extrabold">
+      {/* --- Highlighted Top Days Readout (Subtler Emphasis, Placed last) --- */}
+      {/* Reduced top padding */}
+      <div className="pt-2">
+          {/* Smaller heading */}
+          <h3 className="text-sm font-semibold mb-1 text-gray-700">Recommended Days</h3>
+          {/* Reduced padding, border, and font size */}
+          <div className="bg-yellow-50 p-2 rounded-lg border border-yellow-200 shadow-sm">
+              <span className="text-sm text-gray-900 font-semibold">
                   ⭐ {topDaysInfo}
               </span>
           </div>
