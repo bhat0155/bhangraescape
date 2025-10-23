@@ -2,12 +2,27 @@ import { EventDetail } from "@/app/types/events";
 import { formatDate } from "@/app/lib/format";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import AvailabilityPicker from "@/app/components/AvailabilityPicker";
+import { auth } from "@/app/api/auth/[...nextauth]/route";
 
-export default async function EventDetailPage({ params }: { params: { id: string } }) {
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL;
-  const url = `${base}/events/${params.id}`;
+export default async function EventDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id: eventId } = await params;  
+  console.log({eventId})
+  const base = process.env.NEXT_PUBLIC_API_BASE_URL!;
+  const url = `${base}/events/${eventId}`;
 
-  const res = await fetch(url, { cache: "no-store" });
+  // user info
+  const session = await auth();
+  const role = (session?.user as any)?.role ?? "GUEST";
+
+
+  const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/api/events/${eventId}}`, {
+    cache: "no-store",
+  });
   if (res.status === 404) {
     notFound();
   }
@@ -48,6 +63,17 @@ export default async function EventDetailPage({ params }: { params: { id: string
           {event.description || "No additional details available for this event yet."}
         </p>
       </div>
+     <section className="space-y-3">
+        <h2 className="text-xl font-semibold">Practice Availability</h2>
+        <AvailabilityPicker
+          eventId={data.event.id}
+          role={role}
+          canSet={data.capabilities.canSetAvailability}
+          initialMyDays={data.myDays}
+          initialTallies={data.tallies}
+          initialTopDays={data.topDays}
+        />
+      </section>
     </div>
   );
 }

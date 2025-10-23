@@ -12,3 +12,5 @@ export type EventDetail = {
     date: string;
     description?: string
 }
+
+export type Weekday = "MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT" | "SUN";
