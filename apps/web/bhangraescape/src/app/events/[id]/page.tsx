@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import AvailabilityPicker from "@/app/components/AvailabilityPicker";
 import { auth } from "@/app/api/auth/[...nextauth]/route";
 import { cookies } from "next/headers";
+import InterestedToggle from "@/app/components/InterestedToggle";
+
 
 export default async function EventDetailPage({
   params,
@@ -70,6 +72,25 @@ export default async function EventDetailPage({
           {event.description || "No additional details available for this event yet."}
         </p>
       </div>
+      {/* Toggle */}
+      <section className="space-y-3">
+
+
+  {role === "GUEST" ? (
+    <div className="alert alert-info">
+      <span>Sign in to mark interest.</span>
+    </div>
+  ) : (
+    <InterestedToggle
+      eventId={data.event.id}
+      role={role}
+      canSet={data.capabilities?.canSetInterest ?? false}
+      initialInterested={!!data.interested}
+    />
+  )}
+</section>
+
+      {/* availbility */}
      <section className="space-y-3">
         <h2 className="text-xl font-semibold">Practice Availability</h2>
         <AvailabilityPicker
