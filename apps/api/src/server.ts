@@ -12,16 +12,26 @@ import { devRouter } from './Routes/auth.route';
 import {uploadRouter} from './Routes/uploads.route'
 import { playlistRouter } from './Routes/playlist.routes';
 import {finalMixRouter} from './Routes/finalmix.route';
+import { bearerAuth } from './middlewares/bearAuth';
 
-
+const NEXT_DEV_ORIGIN = process.env.NEXT_DEV_ORIGIN || 'http://localhost:3000';
 // loads env
 dotenv.config();
 const app = express();
-app.use(helmet());  // security headers
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(helmet({
+    crossOriginResourcePolicy: {policy: "cross-origin"}
+}));  // security headers
+
+app.use(cors({
+    origin: [NEXT_DEV_ORIGIN],
+    credentials: true,
+    methods: ["GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}))
 
 app.use(express.json()); // for parsing application/json
 app.use(morgan("dev")); // logging
+app.use(bearerAuth)
 
 // routes
 app.use("/api/events", eventRouter);
