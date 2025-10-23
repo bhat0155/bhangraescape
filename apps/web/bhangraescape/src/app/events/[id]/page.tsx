@@ -7,7 +7,8 @@ import { auth } from "@/app/api/auth/[...nextauth]/route";
 import { cookies } from "next/headers";
 import InterestedToggle from "@/app/components/InterestedToggle";
 import Performers from "@/app/components/Performers";
-
+import type { MediaItem } from "@/app/types/media";
+import MediaGrid from "@/app/components/MediaGrid"; 
 
 export default async function EventDetailPage({
   params,
@@ -42,7 +43,14 @@ export default async function EventDetailPage({
 
   const data = await res.json();
   const event = data.event as EventDetail;
-
+  
+  // Fetching media for the event
+  const mediaRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/uploads/${eventId}/media`, {cache: "no-store"})
+  if(!mediaRes.ok){
+    throw new Error(`Failed to fetch media ${mediaRes.status} ${mediaRes.statusText}`)
+  }
+  const mediaJson = await mediaRes.json();
+  const mediaItems = (mediaJson.items || []) as MediaItem[]
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
       {/* Back link */}
@@ -66,13 +74,6 @@ export default async function EventDetailPage({
         </p>
       </div>
 
-      {/* Event Summary Card */}
-      <div className="card bg-base-100 shadow-xl p-6 mt-6">
-        <h2 className="text-xl font-semibold mb-2">Event Summary</h2>
-        <p className="opacity-80">
-          {event.description || "No additional details available for this event yet."}
-        </p>
-      </div>
       {/* Performers */}
       <Performers performers={data.performers}/>
       
@@ -107,6 +108,8 @@ export default async function EventDetailPage({
           initialTopDays={data.topDays}
         />
       </section>
+
+      <MediaGrid items={mediaItems}></MediaGrid>
     </div>
   );
 }
