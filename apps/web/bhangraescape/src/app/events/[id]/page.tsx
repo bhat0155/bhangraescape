@@ -6,6 +6,7 @@ import AvailabilityPicker from "@/app/components/AvailabilityPicker";
 import { auth } from "@/app/api/auth/[...nextauth]/route";
 import { cookies } from "next/headers";
 import InterestedToggle from "@/app/components/InterestedToggle";
+import Performers from "@/app/components/Performers";
 
 
 export default async function EventDetailPage({
@@ -72,6 +73,10 @@ export default async function EventDetailPage({
           {event.description || "No additional details available for this event yet."}
         </p>
       </div>
+      {/* Performers */}
+      <Performers performers={data.performers}/>
+      
+      
       {/* Toggle */}
       <section className="space-y-3">
 
