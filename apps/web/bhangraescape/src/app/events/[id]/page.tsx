@@ -4,25 +4,32 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import AvailabilityPicker from "@/app/components/AvailabilityPicker";
 import { auth } from "@/app/api/auth/[...nextauth]/route";
+import { cookies } from "next/headers";
 
 export default async function EventDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
   const { id: eventId } = await params;  
   console.log({eventId})
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL!;
-  const url = `${base}/events/${eventId}`;
+  const base = process.env.NEXT_PUBLIC_API_BASE_URL!
 
   // user info
   const session = await auth();
   const role = (session?.user as any)?.role ?? "GUEST";
+  // read jwt from cookies and then pass it to express
+  const token =
+    cookies().get("__Secure-authjs.session-token")?.value ??
+    cookies().get("authjs.session-token")?.value ??
+    null;
 
+    const res = await fetch(`${base}/events/${eventId}`,{
+      cache: "no-store",
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/api/events/${eventId}}`, {
-    cache: "no-store",
-  });
+    })
+  
   if (res.status === 404) {
     notFound();
   }
