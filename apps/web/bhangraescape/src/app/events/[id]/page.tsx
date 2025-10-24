@@ -9,6 +9,7 @@ import InterestedToggle from "@/app/components/InterestedToggle";
 import Performers from "@/app/components/Performers";
 import type { MediaItem } from "@/app/types/media";
 import MediaGrid from "@/app/components/MediaGrid"; 
+import FinalMix from "@/app/components/FinalMix";
 
 export default async function EventDetailPage({
   params,
@@ -51,6 +52,10 @@ export default async function EventDetailPage({
   }
   const mediaJson = await mediaRes.json();
   const mediaItems = (mediaJson.items || []) as MediaItem[]
+
+  const finalTitle = data.event.finalPlaylistTitle ?? null;
+  const finalUrl   = data.event.finalPlaylistUrl ?? null;
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
       {/* Back link */}
@@ -108,7 +113,8 @@ export default async function EventDetailPage({
           initialTopDays={data.topDays}
         />
       </section>
-
+      {/* final Mix */}
+      <FinalMix title={finalTitle} url={finalUrl}/>
       <MediaGrid items={mediaItems}></MediaGrid>
     </div>
   );
