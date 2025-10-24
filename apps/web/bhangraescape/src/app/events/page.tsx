@@ -1,5 +1,9 @@
 import EventCard from "../components/EventCard";
 import { getRelativeTime } from "../lib/time";
+import { auth } from "@/app/api/auth/[...nextauth]/route"; 
+import CreateButtonInline from "../components/CreateButtonInline";
+
+
 
 type EventSummary = {
     id: string;
@@ -42,6 +46,10 @@ export default async function EventsPage({
     let data: EventListResponse | null = null;
     let error: string | null = null;
 
+    // role
+    const session = await auth();
+    const role = (session?.user as any)?.role ?? "GUEST"
+
     // fetch from backend
     try{
         const res = await fetch(url, {cache: "no-store"});
@@ -64,33 +72,35 @@ export default async function EventsPage({
     return(
         // ADDED: Main container with responsive padding and spacing
         <div className="p-4 sm:p-8 space-y-8 max-w-7xl mx-auto">
+
             
             {/* Header with title and optional search form */}
-            <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-                <div>
-                    <h1 className="text-4xl font-extrabold text-primary">Upcoming Events</h1>
-                    <p className="text-lg opacity-80 mt-1">Browse all events hosted by the team.</p>
-                </div>
+        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  {/* Left: title */}
+  <h1 className="text-4xl font-extrabold text-primary">Upcoming Events</h1>
 
-                {/* Search form that uses get */}
-                {/* MODIFIED: Layout to place input and button side-by-side */}
-                <form 
-                    className="flex gap-2 max-w-sm w-full" 
-                    action="/events" 
-                    method="get"
-                >
-                    <input
-                        name="search"
-                        defaultValue={search ?? ""}
-                        placeholder="Search title or location"
-                        // ADDED: DaisyUI input style
-                        className="input input-bordered w-full"
-                    />
-                    <button type="submit" className="btn btn-primary">
-                        Search
-                    </button>
-                </form>
-            </header>
+  {/* Middle: create button */}
+  <div className="flex justify-center sm:justify-center">
+    <CreateButtonInline role={role} />
+  </div>
+
+  {/* Right: search form */}
+  <form
+    className="flex gap-2 max-w-sm w-full sm:w-auto"
+    action="/events"
+    method="get"
+  >
+    <input
+      name="search"
+      defaultValue={search ?? ""}
+      placeholder="Search title or location"
+      className="input input-bordered w-full"
+    />
+    <button type="submit" className="btn btn-primary">
+      Search
+    </button>
+  </form>
+</header>
 
             {/* error handling */}
             {error && (
