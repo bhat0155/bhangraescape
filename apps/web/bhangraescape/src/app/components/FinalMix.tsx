@@ -51,7 +51,7 @@ export default function FinalMix({ title, url }: Props) {
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn btn-sm btn-primary"
+              className="btn btn-sm btn-primary text-white"
               aria-label="Open final mix"
               title="Open final mix"
             >
