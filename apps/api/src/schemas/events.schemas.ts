@@ -12,20 +12,35 @@ export const createEventBody = z.object({
 // patch event
 // refines make sure atleast one thing is updated inside body
 export const patchEventBodyAndParams = z.object({
-    params: z.object({
+  params: z.object({
     eventId: z.string().min(1),
   }),
-    body: z.object({
-        title: z.string().trim().min(1).max(100).optional(),
-        location: z.string().trim().min(1).max(160).optional(),
-        date: z.coerce.date().optional()
-    })
-}).refine((val)=>{
-    const b = val.body;
-    return !!(b.title || b.location || b.date)
-},{
-      message: "Provide at least one field to update (title, location, or date)." 
+  body: z.object({
+    title: z.string().trim().min(1).max(100).optional(),
+    location: z.string().trim().min(1).max(160).optional(),
+    date: z.coerce.date().optional(),
+
+    // final mix fields
+    finalPlaylistProvider: z.enum(["SPOTIFY", "YOUTUBE", "EXTERNAL", "SOUNDCLOUD"]).optional(),
+    finalPlaylistTitle: z.string().trim().max(120).optional(),
+    finalPlaylistUrl: z.string().url().optional(),
+  }),
 })
+.refine((val) => {
+  const b = val.body;
+  // accept if ANY updatable field is provided (not undefined)
+  return [
+    b.title,
+    b.location,
+    b.date,
+    b.finalPlaylistProvider,
+    b.finalPlaylistTitle,
+    b.finalPlaylistUrl,
+  ].some((v) => v !== undefined);
+}, {
+  path: ["body"],
+  message: "Provide at least one field to update.",
+});
 
 // delete event
 // DELETE /api/events/:eventId

@@ -42,7 +42,9 @@ export const eventService = {
         })
         return created;
     },
-    async patchEvent(eventId: string, partial :{title? : string, location?: string, date?: Date }){
+    async patchEvent(eventId: string, partial :{title? : string, location?: string, date?: Date, finalPlaylistProvider?: "SPOTIFY"|"YOUTUBE"|"EXTERNAL"|"SOUNDCLOUD";
+  finalPlaylistTitle?: string | null;
+  finalPlaylistUrl?: string | null; }){
         try{
             const updated = await prisma.event.update({
                 where: {id:eventId},
@@ -56,7 +58,10 @@ export const eventService = {
                     title: true,
                     location: true,
                     date: true,
-                    coverUrl: true
+                    coverUrl: true,
+                    finalPlaylistProvider: true,
+                     finalPlaylistTitle: true, 
+                     finalPlaylistUrl: true
                 }
             })
             return updated;
