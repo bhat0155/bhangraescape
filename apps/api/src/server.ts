@@ -13,6 +13,7 @@ import {uploadRouter} from './Routes/uploads.route'
 import { playlistRouter } from './Routes/playlist.routes';
 import {finalMixRouter} from './Routes/finalmix.route';
 import { bearerAuth } from './middlewares/bearAuth';
+import adminRouter from './Routes/admin.route';
 
 const NEXT_DEV_ORIGIN = process.env.NEXT_DEV_ORIGIN || 'http://localhost:3000';
 // loads env
@@ -42,6 +43,7 @@ app.use("/api",devRouter)
 app.use("/api/uploads", uploadRouter)
 app.use("/api", playlistRouter)
 app.use("/api", finalMixRouter)
+app.use("/api/admin", adminRouter)
 
 
 app.use(errorHandler);

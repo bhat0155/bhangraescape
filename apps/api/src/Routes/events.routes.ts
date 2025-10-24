@@ -3,6 +3,8 @@ import { validate } from "../middlewares/validate";
 import { createEventBody, toggleInterestSchema, getEventParams, getAvailabilityParams, setAvailabilityParams, listEventQuery, patchEventBodyAndParams, deleteEventParams } from "../schemas/events.schemas";
 import { eventController } from "../controllers/events.controller";
 import { authSession, requiredRole } from "../middlewares/auth";
+import { putEventPerformers } from "../controllers/performers.controller";
+import { setPerformersParamsAndBody } from "../schemas/performers.schema";
 
 export const eventRouter = Router();
 
@@ -30,3 +32,11 @@ eventRouter.post("/:eventId/availability",authSession,
 
 // get all events
 eventRouter.get("/", (req,res,next)=>validate(req,res,next,listEventQuery),  eventController.list);
+
+// replace performers for event by admin only
+eventRouter.put("/:eventId/performers",
+  authSession,
+  requiredRole(["ADMIN"]),
+   (req, res, next) => validate(req, res, next, setPerformersParamsAndBody),
+   putEventPerformers
+)

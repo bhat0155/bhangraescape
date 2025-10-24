@@ -51,7 +51,16 @@ export const eventService = {
                 data: {
                     ...(partial.title!== undefined ? {title: partial.title}:{}),
                      ...(partial.location!== undefined ? {location: partial.location}:{}),
-                     ...(partial.date ? {date: partial.date}: {})
+                     ...(partial.date ? {date: partial.date}: {}),
+                      ...(partial.finalPlaylistProvider !== undefined
+          ? { finalPlaylistProvider: partial.finalPlaylistProvider }
+          : {}),
+        ...(partial.finalPlaylistTitle !== undefined
+          ? { finalPlaylistTitle: partial.finalPlaylistTitle }
+          : {}),
+        ...(partial.finalPlaylistUrl !== undefined
+          ? { finalPlaylistUrl: partial.finalPlaylistUrl }
+          : {}),
                 },
                 select:{
                     id: true,
@@ -78,7 +87,8 @@ export const eventService = {
     async getEventDetail(eventId: string, user: {id: string, role?: string} | null){
         const event = await prisma.event.findUnique({
             where: {id: eventId},
-            select: {id: true, title: true, location: true, date: true, coverUrl: true}
+            select: {id: true, title: true, location: true, date: true, coverUrl: true,  finalPlaylistProvider: true,
+    finalPlaylistTitle: true, finalPlaylistUrl: true,}
         })
         if(!event){
             const e:any = new Error("Event not found");
@@ -119,12 +129,15 @@ export const eventService = {
         const weekDayOrder : Weekday[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
         // sort by count first, then by day of week
-        const sortedDays = Object.entries(tallies).sort((a,b)=>(a[1]-b[1]) || (weekDayOrder.indexOf(a[0] as Weekday) - weekDayOrder.indexOf(b[0] as Weekday)));
-
-        // Most popular days are first 2 elements of sorted Array
-        const topDays = sortedDays.slice(0,2).map(([weekday, count])=> {
-            return {weekday: weekday as Weekday, count}
-        });
+        const sortedDays = Object.entries(tallies).sort((a, b) => {
+  const byCountDesc = b[1] - a[1]; 
+  if (byCountDesc !== 0) return byCountDesc;
+  return weekDayOrder.indexOf(a[0] as Weekday) - weekDayOrder.indexOf(b[0] as Weekday);
+});
+const topDays = sortedDays.slice(0, 2).map(([weekday, count]) => ({
+  weekday: weekday as Weekday,
+  count,
+}));
 
         // this section shows user's preferences when they visit the detail page
         let interestedMe = false;
@@ -158,7 +171,8 @@ export const eventService = {
             tallies,
             topDays,
             interested: interestedMe,
-            myDays 
+            myDays,
+             
         }
 
     },
