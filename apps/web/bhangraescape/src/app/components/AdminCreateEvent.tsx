@@ -134,7 +134,6 @@ export default function AdminCreateEvent({ role }: Props) {
           <div className="card-actions justify-end pt-4">
             <button
               type="submit"
-              // Updated button styling for primary color, shadow, and border
               className={`btn btn-primary bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md border-b-4 border-indigo-800 hover:border-indigo-700 transition duration-300 
                 ${readOnly ? "opacity-50 cursor-not-allowed" : ""}
                 ${submitting ? "opacity-70" : ""}`
