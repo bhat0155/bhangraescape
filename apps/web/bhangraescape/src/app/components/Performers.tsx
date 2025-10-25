@@ -1,4 +1,7 @@
+"use client"
 import Image from "next/image";
+import PerformersEditor from "./PerformersEditor";
+import { useState } from "react";
 
 export type Performer = {
   id: string;
@@ -9,15 +12,25 @@ export type Performer = {
 
 export default function Performers({
   performers,
+  eventId,
+  role
 }: {
   performers: Performer[];
+  eventId: string
+  role: "GUEST" | "MEMBER" | "ADMIN";
 }) {
   const hasPerformers = performers && performers.length > 0;
+  const [open, setOpen]=useState(false);
+  const isAdmin = role === "ADMIN";
 
   return (
     <section className="space-y-3">
       <header className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Performers</h2>
+        <button 
+        disabled={!isAdmin}
+        className="btn btn-sm btn-outline"
+        onClick={()=>isAdmin && setOpen(true)}>Edit</button>
       </header>
 
       {/* panel always renders */}
@@ -54,7 +67,14 @@ export default function Performers({
           </div>
         )}
       </div>
+
+      {open && (
+        <div className="mt-3">
+            <PerformersEditor initialIds={performers.map((item)=> item.id)} eventId={eventId} role={role} onClose={()=>setOpen(false)}/>
+        </div>
+      )}
     </section>
+    
   );
 }
 

@@ -10,6 +10,7 @@ import Performers from "@/app/components/Performers";
 import type { MediaItem } from "@/app/types/media";
 import MediaGrid from "@/app/components/MediaGrid"; 
 import FinalMix from "@/app/components/FinalMix";
+import PerformersEditor from "@/app/components/PerformersEditor";
 
 export default async function EventDetailPage({
   params,
@@ -80,7 +81,9 @@ export default async function EventDetailPage({
       </div>
 
       {/* Performers */}
-      <Performers performers={data.performers}/>
+
+      <Performers performers={data.performers} role={role} eventId={event.id}/>
+
       
       
       {/* Toggle */}
