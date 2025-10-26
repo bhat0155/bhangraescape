@@ -20,17 +20,42 @@ export default function Performers({
   role: "GUEST" | "MEMBER" | "ADMIN";
 }) {
   const hasPerformers = performers && performers.length > 0;
-  const [open, setOpen]=useState(false);
+  const [open, setOpen] = useState(false);
   const isAdmin = role === "ADMIN";
 
   return (
     <section className="space-y-3">
       <header className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Performers</h2>
-        <button 
-        disabled={!isAdmin}
-        className="btn btn-sm btn-outline"
-        onClick={()=>isAdmin && setOpen(true)}>Edit</button>
+
+        {/* Edit button with hover tooltip for non-admins */}
+        <div className="relative group">
+          <button
+            type="button"
+            disabled={!isAdmin}
+            onClick={() => isAdmin && setOpen(true)}
+            className={`btn btn-sm btn-outline ${
+              !isAdmin ? "opacity-70 cursor-not-allowed" : "hover:bg-primary hover:text-white"
+            }`}
+            title={isAdmin ? "Edit performers" : "Only admins can edit performers"}
+            aria-disabled={!isAdmin}
+          >
+            🖋️
+          </button>
+
+          {!isAdmin && (
+            <div
+              className="absolute left-1/2 -translate-x-1/2 top-full mt-2 
+                         hidden group-hover:flex items-center gap-2
+                         bg-white text-gray-700 text-sm font-medium 
+                         border border-gray-200 rounded-lg shadow-lg
+                         px-3 py-2 z-10 whitespace-nowrap"
+            >
+              <span role="img" aria-label="forbidden" className="text-red-500">🚫</span>
+              Only admins can edit performers
+            </div>
+          )}
+        </div>
       </header>
 
       {/* panel always renders */}
@@ -61,20 +86,23 @@ export default function Performers({
             ))}
           </ul>
         ) : (
-          // ✅ this message now shows *inside the same panel*
           <div className="text-sm opacity-70 text-center py-6">
-           Such Empty, Much Wow.
+            Such Empty, Much Wow.
           </div>
         )}
       </div>
 
       {open && (
         <div className="mt-3">
-            <PerformersEditor initialIds={performers.map((item)=> item.id)} eventId={eventId} role={role} onClose={()=>setOpen(false)}/>
+          <PerformersEditor
+            initialIds={performers.map((item) => item.id)}
+            eventId={eventId}
+            role={role}
+            onClose={() => setOpen(false)}
+          />
         </div>
       )}
     </section>
-    
   );
 }
 
