@@ -9,6 +9,7 @@ type Props = {
   eventId: string;
   role: Role;
   initialMedia: MediaItem[];
+  token: string | null;
 };
 
 const MAX_FILE_SIZE = 60 * 1024 * 1024; // 60 MB
@@ -25,15 +26,32 @@ function formatBytes(n: number) {
   return `${v.toFixed(1)} ${units[i]}`;
 }
 
-type UploadStatus = "IDLE" | "READY" | "FAILED";
+type UploadStatus = "IDLE" | "READY" | "PRESIGNING" | "UPLOADING" | "FAILED";
+
+type PresignResponse = {
+    url: string;
+    fields: Record<string,string>;
+    key: string;
+    publicUrl: string;
+    expiresIn: number;
+}
+
 type UploadState = {
   file: File | null;
   kind: "IMAGE" | "VIDEO" | null;
   status: UploadStatus;
   errorMessage: string | null;
+  presign?: PresignResponse
 };
 
-export default function MediaManager({ eventId, role, initialMedia }: Props) {
+// helper function to grab file extension
+function getExt(name: string): string {
+    const i = name.lastIndexOf(".");
+    return i >= 0 ? name.slice(i+1).toLowerCase() : "";
+}
+
+
+export default function MediaManager({ eventId, role, initialMedia, token }: Props) {
   const [media, setMedia] = useState<MediaItem[]>(initialMedia);
   const [showUploader, setShowUploader] = useState(false);
   const isAdmin = role === "ADMIN";
@@ -44,6 +62,59 @@ export default function MediaManager({ eventId, role, initialMedia }: Props) {
     status: "IDLE",
     errorMessage: null,
   });
+
+  async function handleUploadStart(){
+    if(role !== "ADMIN") return;
+    if(!uploadState.file || uploadState.status !== "READY") return;
+
+    try{
+        // flip UI to presigning
+        setUploadState((s)=>({
+            ...s,
+            status: "PRESIGNING",
+            errorMessage: null
+        }))
+
+        // prepare metadata for backend
+        const contentType = uploadState.file.type;
+        const ext = getExt(uploadState.file.name);
+        const payload = {
+            prefix: "events",
+            contentType,
+            ext
+        }
+
+        // calling the s3 endpoint
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/uploads/${eventId}/media/presign`,{
+            method: "POST",
+            headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+            body: JSON.stringify(payload)
+        });
+
+        if(!res.ok){
+            const t = await res.text();
+            throw new Error(`Presign failed: ${res.status} ${res.statusText} - ${t}`)
+        }
+
+        // if everything good, stash presign and change the status
+        const presign = (await res.json()) as PresignResponse;
+
+        setUploadState((s)=>({
+            ...s,
+            status: "UPLOADING",
+            presign,
+            errorMessage: null
+        }))
+    }catch(err){
+        console.log(err);
+        setUploadState((s)=>({
+            ...s,
+            status: "FAILED",
+            errorMessage: "Could not get S3 permissions. Please try again"
+        }))
+    }
+  }
+
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
@@ -175,9 +246,35 @@ export default function MediaManager({ eventId, role, initialMedia }: Props) {
               </div>
             )}
           </div>
+
+          {/* actions */}
+          <div className="flex items-center gap-2">
+            <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            onClick={handleUploadStart}
+            disabled={!isAdmin || !uploadState.file || uploadState.status !== "READY"}
+            title="Upload"
+            >Upload
+            </button>
+          </div>
         </div>
       )}
 
+      {/* clear selection button */}
+      <button
+      type="button"
+      className="btn btn-ghost btn-sm"
+     onClick={() =>
+      setUploadState({ file: null, kind: null, status: "IDLE", errorMessage: null })
+    }
+    disabled={uploadState.status === "PRESIGNING"}
+      >Clear
+      </button>
+      
+    {uploadState.status === "PRESIGNING" && (
+    <div className="text-sm opacity-80">Requesting S3 permission…</div>
+    )}
       {/* Media grid */}
       <MediaGrid items={media} />
     </section>

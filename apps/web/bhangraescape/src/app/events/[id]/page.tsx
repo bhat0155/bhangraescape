@@ -120,7 +120,7 @@ export default async function EventDetailPage({
       {/* final Mix */}
       <FinalMix title={finalTitle} url={finalUrl}/>
       {/* <MediaGrid items={mediaItems}></MediaGrid> */}
-      <MediaManager eventId={event.id} role={role} initialMedia={mediaItems}/>
+      <MediaManager eventId={event.id} role={role} initialMedia={mediaItems} token={token}/>
     </div>
   );
 }
