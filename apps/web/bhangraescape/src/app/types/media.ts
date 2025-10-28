@@ -6,4 +6,6 @@ export type MediaItem = {
     thumbUrl?: string | null
     title?: string | null
     createdAt: string
+    canEdit?: boolean
+    onDelete?: ()=>void
 }

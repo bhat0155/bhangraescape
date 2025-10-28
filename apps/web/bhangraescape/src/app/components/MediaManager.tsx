@@ -245,6 +245,30 @@ export default function MediaManager({ eventId, role, initialMedia, token }: Pro
     });
   }
 
+  async function handleDeleteMedia(media: MediaItem){
+    if(!isAdmin || !token) return;
+    try{
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/uploads/media/${media.id}`, {
+            method: "DELETE",
+            headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        });
+        if(!res.ok){
+            throw new Error(`Delete failed ${res.status}`);
+
+        }
+        if(res.ok){
+            setMedia((prev)=> prev.filter((item)=> item.id != media.id))
+        }
+        console.log(` Media ${media.title} deleted successfully.`);
+
+    }catch(err){
+        console.log(err)
+        throw new Error(`Failed to delete media: ${err}`)
+    }
+  }
+
   return (
     <section className="space-y-4">
       {/* Header row */}
@@ -337,7 +361,7 @@ export default function MediaManager({ eventId, role, initialMedia, token }: Pro
           {/* Title input box */}
           <div className="max-w-md">
             <label htmlFor="media-title" className="block text-sm font-medium mb-1">
-                Title (optional)
+                Title (Mandatory)
             </label>
             <input
             type="text"
@@ -396,7 +420,15 @@ export default function MediaManager({ eventId, role, initialMedia, token }: Pro
   <div className="text-sm opacity-80">Uploading to S3…</div>
 )}
       {/* Media grid */}
-      <MediaGrid items={media} />
+     <MediaGrid
+  items={media.map((m) => ({
+    ...m,
+    canEdit: isAdmin && showUploader,            
+    onDelete: isAdmin && showUploader
+      ? () => handleDeleteMedia(m)               
+      : undefined,
+  }))}
+/>
     </section>
   );
 }

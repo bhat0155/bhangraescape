@@ -1,11 +1,13 @@
 "use client";
 
 import type { MediaItem } from "@/app/types/media";
+import { Trash2 } from "lucide-react";
 
 const FALLBACK_IMAGE_URL =
   "https://placehold.co/300x200?text=Image+Unavailable";
 const FALLBACK_VIDEO_THUMB_URL =
   "https://placehold.co/300x200?text=Video";
+
 
 export default function MediaGrid({ items }: { items: MediaItem[] }) {
   if (!items || items.length === 0) {
@@ -31,7 +33,7 @@ export default function MediaGrid({ items }: { items: MediaItem[] }) {
 
             if (isImage) {
               return (
-                <li key={m.id} className="shrink-0 text-center">
+                <li key={m.id} className="relative shrink-0 text-center group">
                   <div className="relative">
                     <img
                       src={m.url}
@@ -50,6 +52,17 @@ export default function MediaGrid({ items }: { items: MediaItem[] }) {
                   {m.title ? (
                     <div className="mt-1 text-xs font-medium opacity-80">{m.title}</div>
                   ) : null}
+                   {m.canEdit && m.onDelete && (
+                    <button
+                        type="button"
+                        onClick={m.onDelete}
+                        className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 shadow"
+                    >
+                        <Trash2 size={14} />
+                        <span className="text-xs">Delete</span>
+                    </button>
+                    )}
+
                 </li>
               );
             }
@@ -58,7 +71,7 @@ export default function MediaGrid({ items }: { items: MediaItem[] }) {
             const thumb = (m as MediaItem).thumbUrl || FALLBACK_VIDEO_THUMB_URL;
 
             return (
-              <li key={m.id} className="shrink-0 text-center">
+              <li key={m.id} className="relative shrink-0 text-center group">
                 <a
                   href={m.url}
                   target="_blank"
@@ -92,6 +105,17 @@ export default function MediaGrid({ items }: { items: MediaItem[] }) {
                 {m.title ? (
                   <div className="mt-1 text-xs font-medium opacity-80">{m.title}</div>
                 ) : null}
+                {m.canEdit && m.onDelete && (
+                    <button
+                        type="button"
+                        onClick={m.onDelete}
+                        className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 shadow"
+                    >
+                        <Trash2 size={14} />
+                        <span className="text-xs">Delete</span>
+                    </button>
+                    )}
+
               </li>
             );
           })}
