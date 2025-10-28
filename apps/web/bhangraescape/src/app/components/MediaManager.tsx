@@ -248,29 +248,45 @@ export default function MediaManager({ eventId, role, initialMedia, token }: Pro
           </div>
 
           {/* actions */}
-          <div className="flex items-center gap-2">
+          {/* actions: Upload + Clear side-by-side */}
+<div className="flex items-center gap-2 pt-1">
+  {/* Upload (primary indigo) */}
+  <button
+    type="button"
+    className="btn btn-primary btn-sm"
+    onClick={handleUploadStart}
+    disabled={
+      !isAdmin ||
+      !uploadState.file ||
+      uploadState.status !== "READY"
+    }
+    title="Upload"
+  >
+    Upload
+  </button>
+
+  {/* Clear (same hue, outlined) */}
             <button
-            type="button"
-            className="btn btn-primary btn-sm"
-            onClick={handleUploadStart}
-            disabled={!isAdmin || !uploadState.file || uploadState.status !== "READY"}
-            title="Upload"
-            >Upload
+                type="button"
+                className="btn btn-outline btn-primary btn-sm"
+                onClick={() =>
+                setUploadState({
+                    file: null,
+                    kind: null,
+                    status: "IDLE",
+                    errorMessage: null,
+                    presign: undefined,
+                })
+                }
+                disabled={uploadState.status === "PRESIGNING"}
+                title="Clear selected file"
+            >
+                Clear
             </button>
-          </div>
+            </div>
         </div>
       )}
 
-      {/* clear selection button */}
-      <button
-      type="button"
-      className="btn btn-ghost btn-sm"
-     onClick={() =>
-      setUploadState({ file: null, kind: null, status: "IDLE", errorMessage: null })
-    }
-    disabled={uploadState.status === "PRESIGNING"}
-      >Clear
-      </button>
       
     {uploadState.status === "PRESIGNING" && (
     <div className="text-sm opacity-80">Requesting S3 permission…</div>
