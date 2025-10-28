@@ -26,7 +26,7 @@ function formatBytes(n: number) {
   return `${v.toFixed(1)} ${units[i]}`;
 }
 
-type UploadStatus = "IDLE" | "READY" | "PRESIGNING" | "UPLOADING" | "FAILED";
+type UploadStatus = "IDLE" | "READY" | "PRESIGNING" | "UPLOADING" | "REGISTERING" | "FAILED";
 
 type PresignResponse = {
     url: string;
@@ -50,6 +50,29 @@ function getExt(name: string): string {
     return i >= 0 ? name.slice(i+1).toLowerCase() : "";
 }
 
+// function for direct s3 upload
+async function directS3Upload(presign: PresignResponse, file: File){
+    // build formdata which would be send to s3
+    const form = new FormData();
+
+    // make key value pairs of form fields
+    Object.entries(presign.fields).forEach(([k,v])=> form.append(k,v));
+
+    // append to file key
+    form.append("file", file)
+
+    // post to s3
+    const resS3 = await fetch(presign.url, {
+        method: "POST",
+        body: form
+    })
+
+    // s3 returns 204 on success
+    if(resS3.status !=204){
+        const errorText = await resS3.text().catch((err)=>console.log(err));
+        throw new Error(`Direct S3 upload failed. Status ${resS3.status}. ${resS3 || ""}`.trim())
+    }
+}
 
 export default function MediaManager({ eventId, role, initialMedia, token }: Props) {
   const [media, setMedia] = useState<MediaItem[]>(initialMedia);
@@ -105,6 +128,26 @@ export default function MediaManager({ eventId, role, initialMedia, token }: Pro
             presign,
             errorMessage: null
         }))
+
+        // uploading to s3
+        try{
+            await directS3Upload(presign, uploadState.file)
+
+             setUploadState((s)=> ({
+                ...s,
+                status: "REGISTERING",
+                errorMessage: null
+            }))
+
+        }catch(err){
+            console.log(err)
+            setUploadState((s)=> ({
+                ...s,
+                status: "FAILED",
+                errorMessage: "Direct S3 upload failed. Please try again.",
+            }))
+        }
+
     }catch(err){
         console.log(err);
         setUploadState((s)=>({
@@ -248,7 +291,6 @@ export default function MediaManager({ eventId, role, initialMedia, token }: Pro
           </div>
 
           {/* actions */}
-          {/* actions: Upload + Clear side-by-side */}
 <div className="flex items-center gap-2 pt-1">
   {/* Upload (primary indigo) */}
   <button
@@ -291,6 +333,9 @@ export default function MediaManager({ eventId, role, initialMedia, token }: Pro
     {uploadState.status === "PRESIGNING" && (
     <div className="text-sm opacity-80">Requesting S3 permission…</div>
     )}
+    {uploadState.status === "UPLOADING" && (
+  <div className="text-sm opacity-80">Uploading to S3…</div>
+)}
       {/* Media grid */}
       <MediaGrid items={media} />
     </section>
