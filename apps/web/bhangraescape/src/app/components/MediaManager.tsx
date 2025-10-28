@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useState } from "react";
 import MediaGrid from "./MediaGrid";
 import type { MediaItem } from "../types/media";
@@ -7,114 +7,99 @@ type Role = "GUEST" | "MEMBER" | "ADMIN";
 
 type Props = {
   eventId: string;
-  role: Role;                  
+  role: Role;
   initialMedia: MediaItem[];
 };
 
-const MAX_FILE_SIZE = 60 * 1024 * 1024; // only upto 60 mb files allowed
+const MAX_FILE_SIZE = 60 * 1024 * 1024; // 60 MB
 
-// function to show file storage to user
-function formatBytes(n: number){
-    if(!Number.isFinite(n)) return "0 B";
-    const units = ["B", "KB", "MB", "GB"];
-
-    let i =0;
-    let v = n;
-
-    while (v>= 1024 && i < units.length - 1){
-        v/=1024;
-        i++
-    }
-    return `${v.toFixed(1)} ${units[i]}`;
+function formatBytes(n: number) {
+  if (!Number.isFinite(n)) return "0 B";
+  const units = ["B", "KB", "MB", "GB"];
+  let i = 0;
+  let v = n;
+  while (v >= 1024 && i < units.length - 1) {
+    v /= 1024;
+    i++;
+  }
+  return `${v.toFixed(1)} ${units[i]}`;
 }
 
 type UploadStatus = "IDLE" | "READY" | "FAILED";
-
-type uploadState = {
-    file: File | null,
-    kind: "IMAGE" | "VIDEO" | null,
-    status: UploadStatus,
-    errorMessage: string | null
-}
-
-
+type UploadState = {
+  file: File | null;
+  kind: "IMAGE" | "VIDEO" | null;
+  status: UploadStatus;
+  errorMessage: string | null;
+};
 
 export default function MediaManager({ eventId, role, initialMedia }: Props) {
   const [media, setMedia] = useState<MediaItem[]>(initialMedia);
   const [showUploader, setShowUploader] = useState(false);
   const isAdmin = role === "ADMIN";
 
-  const [uploadState, setUploadState] = useState<uploadState>({
+  const [uploadState, setUploadState] = useState<UploadState>({
     file: null,
     kind: null,
     status: "IDLE",
-    errorMessage: null
-  })
+    errorMessage: null,
+  });
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>){
-    // upload one file at a time
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
 
-    if(!file){
-        setUploadState({
-            file: null,
-            kind: null,
-            status: "IDLE",
-            errorMessage: null
-        })
-        return;
+    if (!file) {
+      setUploadState({ file: null, kind: null, status: "IDLE", errorMessage: null });
+      return;
     }
 
-    // size check
-    if(file?.size > MAX_FILE_SIZE){
-        setUploadState({
-            file: null,
-            kind: null,
-            status: "FAILED",
-            errorMessage: `File too large, max allowed is ${formatBytes(MAX_FILE_SIZE)}`
-        })
-        e.currentTarget.value = "";
-        return
-
+    if (file.size > MAX_FILE_SIZE) {
+      setUploadState({
+        file: null,
+        kind: null,
+        status: "FAILED",
+        errorMessage: `File too large. Max allowed is ${formatBytes(MAX_FILE_SIZE)}.`,
+      });
+      e.currentTarget.value = "";
+      return;
     }
 
-    // type check
-    const mime = file?.type || null;
-    const isImage = mime?.startsWith("image/");
-    const isVideo = mime?.startsWith("video/");
+    const mime = file.type || "";
+    const isImage = mime.startsWith("image/");
+    const isVideo = mime.startsWith("video/");
 
-    if(!isImage && !isVideo){
-        setUploadState({
-            file: null,
-            kind: null,
-            status: "FAILED",
-            errorMessage: `Unsupported file type. Please choose an image or a video`
-        })
-         e.currentTarget.value = "";
-        return
+    if (!isImage && !isVideo) {
+      setUploadState({
+        file: null,
+        kind: null,
+        status: "FAILED",
+        errorMessage: "Unsupported file type. Please choose an image or a video.",
+      });
+      e.currentTarget.value = "";
+      return;
     }
 
-    // if all good, turn the status to READY
-     setUploadState({
-            file,
-            kind: isImage? "IMAGE":"VIDEO",
-            status: "READY",
-            errorMessage: null
-        })
+    setUploadState({
+      file,
+      kind: isImage ? "IMAGE" : "VIDEO",
+      status: "READY",
+      errorMessage: null,
+    });
   }
 
   return (
-    <section className="space-y-3">
+    <section className="space-y-4">
+      {/* Header row */}
       <header className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Videos &amp; Photos</h2>
 
-        {/* Wrapper must be relative + group so the tooltip can anchor and show on hover */}
-        <div className="relative group">
+        {/* visible to everyone; disabled for non-admins with tooltip */}
+        <div className="relative inline-flex group">
           <button
             type="button"
             className={`btn btn-primary btn-sm ${!isAdmin ? "btn-disabled opacity-70 cursor-not-allowed" : ""}`}
             disabled={!isAdmin}
-            onClick={() => isAdmin && setShowUploader((prev) => !prev)}
+            onClick={() => isAdmin && setShowUploader((v) => !v)}
             aria-expanded={showUploader}
             aria-controls="media-uploader"
             title={isAdmin ? "Add media to this event" : "Only admins can add media"}
@@ -122,52 +107,78 @@ export default function MediaManager({ eventId, role, initialMedia }: Props) {
             {showUploader ? "Close" : "+ Add"}
           </button>
 
-          {/* Hover tooltip for non-admins */}
           {!isAdmin && (
             <div
               className="absolute left-1/2 -translate-x-1/2 top-full mt-2
                          hidden group-hover:flex items-center gap-2
-                         bg-white text-gray-700 text-sm font-medium
-                         border border-gray-200 rounded-lg shadow-lg
+                         bg-base-100 text-base-content text-sm font-medium
+                         border border-base-300 rounded-lg shadow-lg
                          px-3 py-2 z-10 whitespace-nowrap"
               role="note"
             >
-              <span role="img" aria-label="forbidden" className="text-red-500">🚫</span>
+              <span role="img" aria-label="forbidden" className="text-error">
+                🚫
+              </span>
               Only admins can add media
             </div>
           )}
         </div>
       </header>
 
-      {/* Uploader container (we'll fill in next steps) */}
-      
-      {showUploader && isAdmin && (
-        <div id="media-uploader" className="rounded-lg border border-base-300 p-3">
-            {/* file picker and presign upload comes here */}
-            <div className="text-sm opacity-70">Max file size {formatBytes(MAX_FILE_SIZE)}</div>
-            <input
+      {/* Uploader */}
+      {showUploader && (
+        <div
+          id="media-uploader"
+          className="rounded-xl bg-base-100 border border-base-300 p-4 shadow-sm space-y-3"
+        >
+          <div className="text-xs opacity-70">Max file size: {formatBytes(MAX_FILE_SIZE)}</div>
+
+          {/* dashed dropzone look (click to open) */}
+          <label
+            htmlFor="media-file"
+            className={`w-full rounded-lg border-2 border-dashed p-6 grid place-items-center
+                        cursor-pointer transition
+                        ${uploadState.status === "FAILED" ? "border-error/60 bg-error/10" : "border-base-300 hover:border-primary/60 hover:bg-base-200/40"}`}
+          >
+            <div className="flex flex-col items-center gap-2 text-center">
+              <span className="text-sm font-medium">
+                {uploadState.file ? "Change file" : "Click to choose a file"}
+              </span>
+              <span className="text-xs opacity-70">Images or Videos</span>
+            </div>
+          </label>
+          <input
+            id="media-file"
             type="file"
-            accept="image/*, video/*"
+            accept="image/*,video/*"
             onChange={handleFileChange}
-            >
-            </input>
+            className="hidden"
+          />
+
+          {/* feedback block */}
+          <div className="text-sm">
+            {uploadState.status === "IDLE" && (
+              <div className="badge badge-ghost">No file selected</div>
+            )}
+
+            {uploadState.status === "READY" && uploadState.file && (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="badge badge-outline">{uploadState.kind}</span>
+                <span className="badge badge-ghost">{formatBytes(uploadState.file.size)}</span>
+                <span className="truncate max-w-[60ch]">{uploadState.file.name}</span>
+              </div>
+            )}
+
+            {uploadState.status === "FAILED" && (
+              <div className="alert alert-error mt-2">
+                <span>Invalid file: {uploadState.errorMessage}</span>
+              </div>
+            )}
+          </div>
         </div>
       )}
-{/* Feedback */}
-      <div aria-live="polite">
-        {uploadState.status ===  "IDLE" && <p>No file selected</p>}
-        {uploadState.status === "READY" && uploadState.file && (
-            <p>
-                <strong>name : {uploadState.file.name}</strong>
-                <strong>size : {formatBytes(uploadState.file.size)}</strong>
-                <strong>kind: {uploadState.kind == "IMAGE" ? "Image" : "Video"}</strong>
-            </p>
-        )}
-        {/* Error handling */}
-        {uploadState.status === "FAILED" && (
-            <strong>Invalid file : {uploadState.errorMessage}</strong>
-        )}
-      </div>
+
+      {/* Media grid */}
       <MediaGrid items={media} />
     </section>
   );
