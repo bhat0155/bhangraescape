@@ -77,6 +77,7 @@ async function directS3Upload(presign: PresignResponse, file: File){
 export default function MediaManager({ eventId, role, initialMedia, token }: Props) {
   const [media, setMedia] = useState<MediaItem[]>(initialMedia);
   const [showUploader, setShowUploader] = useState(false);
+  const [title, setTitle] = useState<string>("");
   const isAdmin = role === "ADMIN";
 
   const [uploadState, setUploadState] = useState<UploadState>({
@@ -139,6 +140,20 @@ export default function MediaManager({ eventId, role, initialMedia, token }: Pro
                 errorMessage: null
             }))
 
+            // register to db
+            const providedTitle = title.trim() ?? "media";
+
+            // authenticated post req to store inside db
+            const newItem = await registerUploadedMedia({eventId, token, url: presign.url, kind: uploadState.kind!, title: providedTitle, key: presign.key})
+
+            // change state variable
+            setMedia((prev)=> [newItem, ...prev])
+
+            // reset state and close uploader
+            setUploadState({file: null, kind: null, status:"IDLE", errorMessage: null})
+            setTitle("");
+            setShowUploader(false)
+
         }catch(err){
             console.log(err)
             setUploadState((s)=> ({
@@ -158,6 +173,35 @@ export default function MediaManager({ eventId, role, initialMedia, token }: Pro
     }
   }
 
+  async function registerUploadedMedia(opts: {
+    eventId: string,
+    token: string | null,
+    url: string,
+    kind: "IMAGE"|"VIDEO",
+    title?: string|null,
+    key: string
+  }): Promise<MediaItem>{
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/uploads/${opts.eventId}/media`,{
+        method: "POST",
+        headers:  {
+        "Content-Type": "application/json",
+        ...(opts.token ? { Authorization: `Bearer ${opts.token}` } : {}),
+      },
+      body: JSON.stringify({
+        fileKey: opts.key,
+        type: opts.kind,
+        title: opts.title
+      })
+    })
+
+    if(!res.ok){
+         const t = await res.text().catch(() => "");
+       throw new Error(`DB register failed: ${res.status} ${res.statusText} — ${t}`);
+    }
+
+    const json = (await res.json()) as MediaItem;
+    return json
+  }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
@@ -288,6 +332,21 @@ export default function MediaManager({ eventId, role, initialMedia, token }: Pro
                 <span>Invalid file: {uploadState.errorMessage}</span>
               </div>
             )}
+          </div>
+
+          {/* Title input box */}
+          <div className="max-w-md">
+            <label htmlFor="media-title" className="block text-sm font-medium mb-1">
+                Title (optional)
+            </label>
+            <input
+            type="text"
+            className="input input-bordered input-sm w-full"
+            placeholder="e.g., Group pose, Crown lift, Full routine"
+            onChange={(ev)=> setTitle(ev.target.value)}
+            disabled={uploadState.status === "PRESIGNING" || uploadState.status === "UPLOADING"}
+             >
+            </input>
           </div>
 
           {/* actions */}
