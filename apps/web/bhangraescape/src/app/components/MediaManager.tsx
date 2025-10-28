@@ -7,14 +7,101 @@ type Role = "GUEST" | "MEMBER" | "ADMIN";
 
 type Props = {
   eventId: string;
-  role: Role;                  // tighten the type
+  role: Role;                  
   initialMedia: MediaItem[];
 };
+
+const MAX_FILE_SIZE = 60 * 1024 * 1024; // only upto 60 mb files allowed
+
+// function to show file storage to user
+function formatBytes(n: number){
+    if(!Number.isFinite(n)) return "0 B";
+    const units = ["B", "KB", "MB", "GB"];
+
+    let i =0;
+    let v = n;
+
+    while (v>= 1024 && i < units.length - 1){
+        v/=1024;
+        i++
+    }
+    return `${v.toFixed(1)} ${units[i]}`;
+}
+
+type UploadStatus = "IDLE" | "READY" | "FAILED";
+
+type uploadState = {
+    file: File | null,
+    kind: "IMAGE" | "VIDEO" | null,
+    status: UploadStatus,
+    errorMessage: string | null
+}
+
+
 
 export default function MediaManager({ eventId, role, initialMedia }: Props) {
   const [media, setMedia] = useState<MediaItem[]>(initialMedia);
   const [showUploader, setShowUploader] = useState(false);
   const isAdmin = role === "ADMIN";
+
+  const [uploadState, setUploadState] = useState<uploadState>({
+    file: null,
+    kind: null,
+    status: "IDLE",
+    errorMessage: null
+  })
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>){
+    // upload one file at a time
+    const file = e.target.files?.[0] ?? null;
+
+    if(!file){
+        setUploadState({
+            file: null,
+            kind: null,
+            status: "IDLE",
+            errorMessage: null
+        })
+        return;
+    }
+
+    // size check
+    if(file?.size > MAX_FILE_SIZE){
+        setUploadState({
+            file: null,
+            kind: null,
+            status: "FAILED",
+            errorMessage: `File too large, max allowed is ${formatBytes(MAX_FILE_SIZE)}`
+        })
+        e.currentTarget.value = "";
+        return
+
+    }
+
+    // type check
+    const mime = file?.type || null;
+    const isImage = mime?.startsWith("image/");
+    const isVideo = mime?.startsWith("video/");
+
+    if(!isImage && !isVideo){
+        setUploadState({
+            file: null,
+            kind: null,
+            status: "FAILED",
+            errorMessage: `Unsupported file type. Please choose an image or a video`
+        })
+         e.currentTarget.value = "";
+        return
+    }
+
+    // if all good, turn the status to READY
+     setUploadState({
+            file,
+            kind: isImage? "IMAGE":"VIDEO",
+            status: "READY",
+            errorMessage: null
+        })
+  }
 
   return (
     <section className="space-y-3">
@@ -57,9 +144,30 @@ export default function MediaManager({ eventId, role, initialMedia }: Props) {
       {showUploader && isAdmin && (
         <div id="media-uploader" className="rounded-lg border border-base-300 p-3">
             {/* file picker and presign upload comes here */}
-            <div className="text-sm opacity-70">File Picker will be placed here</div>
+            <div className="text-sm opacity-70">Max file size {formatBytes(MAX_FILE_SIZE)}</div>
+            <input
+            type="file"
+            accept="image/*, video/*"
+            onChange={handleFileChange}
+            >
+            </input>
         </div>
       )}
+{/* Feedback */}
+      <div aria-live="polite">
+        {uploadState.status ===  "IDLE" && <p>No file selected</p>}
+        {uploadState.status === "READY" && uploadState.file && (
+            <p>
+                <strong>name : {uploadState.file.name}</strong>
+                <strong>size : {formatBytes(uploadState.file.size)}</strong>
+                <strong>kind: {uploadState.kind == "IMAGE" ? "Image" : "Video"}</strong>
+            </p>
+        )}
+        {/* Error handling */}
+        {uploadState.status === "FAILED" && (
+            <strong>Invalid file : {uploadState.errorMessage}</strong>
+        )}
+      </div>
       <MediaGrid items={media} />
     </section>
   );
