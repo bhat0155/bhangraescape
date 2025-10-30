@@ -1,10 +1,10 @@
 // public get one
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const BASE_API = process.env.NEXT_PUBLIC_API_BASE_URL!; 
 
-export async function GET({params}:{params: {id: string}}){
+export async function GET(_req: NextRequest, {params}:{params: {id: string}}){
 
     const upstream = await fetch(`${BASE_API}/members/${params.id}`, {
         cache: "no-store"
