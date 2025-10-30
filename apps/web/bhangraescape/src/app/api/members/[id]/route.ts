@@ -1,5 +1,6 @@
 // public get one
 
+import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
 const BASE_API = process.env.NEXT_PUBLIC_API_BASE_URL!; 
@@ -20,5 +21,28 @@ export async function GET(_req: NextRequest, {params}:{params: {id: string}}){
     }
 
     const json = await upstream.json()
+    return NextResponse.json(json, {status: 200})
+}
+
+export async function PATCH(req: NextRequest, {params}: {params: {id: string}}){
+    const body = await req.json();
+    const raw = await getToken({req, raw: true})
+
+    const upstream = await fetch(`${BASE_API}/members/${params.id}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            ...(raw ? {Authorization: `Bearer ${raw}`}: {})
+        },
+        body: JSON.stringify(body),
+        cache: "no-store"
+    })
+
+    if(!upstream.ok){
+        const text = await upstream.text();
+        return NextResponse.json({error: text || "error in upstream"}, {status: upstream.status})
+    }
+
+    const json = await upstream.json();
     return NextResponse.json(json, {status: 200})
 }
