@@ -1,72 +1,109 @@
-"use client"
+// app/members/[id]/components/AvatarEditorUrl.tsx (CLIENT)
+"use client";
+
 import { useState } from "react";
 
-export default function AvatarEditor({memberId, initialUrl, onClose, onDone}: {memberId: string, initialUrl: string, onClose: ()=> void, onDone: ()=> void}){
+export default function AvatarEditorUrl({
+  memberId,
+  initialUrl,
+  onClose,
+  onDone,
+}: {
+  memberId: string;
+  initialUrl: string;
+  onClose: () => void; // called when user cancels
+  onDone: () => void;  // called after successful save
+}) {
   const [url, setUrl] = useState(initialUrl);
-  const [saving, setSaving]=useState(false);
-  const [error, setError]=useState<string|null>(null)
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
- async function handleSave(){
-    setError(null)
-    if(!url.trim()){
-        setError("please select valid url");
-        return;
+  // tiny client guard: very light URL check
+  function looksLikeUrl(str: string) {
+    try {
+      new URL(str);
+      return true;
+    } catch {
+      return false;
     }
-    setSaving(true)
-    try{
-        const res = await fetch(`/api/members/${memberId}`,{
-            method: "PATCH",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({avatarUrl: url.trim()})
-        })
-        if(!res.ok){
-            throw new Error("Cannot save the updated url")
-        }
-        onDone()
-    }catch(err){
-        console.log(err)
-      setError(err?.message ?? "Failed to save avatar.");
-    }finally{
-        setSaving(false)
-    }
-
   }
-    return(
-        <div className="rounded-lg border p-3 space-y-2">
-            <div>
-                <label htmlFor="avatarUrl" className="block text-sm font-medium">
-                    Avatar Url
-                </label>
-                <input
-                type="text"
-                onChange={(ev)=> setUrl(ev.target.value)}
-                 placeholder="https://example.com/photo.jpg"
-                 value={url}
-                  className="input input-bordered w-full"
-                disabled={saving}
-                ></input>
-            </div>
+
+  async function handleSave() {
+    setError(null);
+
+    // 1) basic client checks
+    if (!url.trim()) {
+      setError("Please enter an image URL.");
+      return;
+    }
+    if (!looksLikeUrl(url.trim())) {
+      setError("That doesn't look like a valid URL.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      // 2) call our PATCH proxy
+      const res = await fetch(`/api/members/${memberId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarUrl: url.trim() }),
+      });
+
+      if (!res.ok) {
+        const t = await res.text();
+        throw new Error(`Save failed: ${res.status} ${t}`);
+      }
+
+      // 3) success → tell parent to close + refresh
+      onDone();
+    } catch (e: any) {
+      setError(e?.message ?? "Failed to save avatar.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="rounded-lg border p-3 space-y-2">
+      <div>
+        <label htmlFor="avatar-url" className="block text-sm font-medium">
+          Avatar URL
+        </label>
+        <input
+          id="avatar-url"
+          type="url"
+          placeholder="https://example.com/photo.jpg"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          className="input input-bordered w-full"
+          disabled={saving}
+        />
+      </div>
+
       {error && <div className="text-sm text-red-600">{error}</div>}
 
-            <button
-            type="button"
-            onClick={handleSave}
-            disabled={saving}
-              className="btn btn-primary btn-sm"
-              title="saving avatar url"
-            >
-                Save
-            </button>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          className="btn btn-primary btn-sm"
+          onClick={handleSave}
+          disabled={saving}
+          title="Save avatar URL"
+        >
+          {saving ? "Saving…" : "Save"}
+        </button>
 
-            <button
-            type="button"
-            onClick={onClose}
-            disabled={saving}
-              className="btn btn-primary btn-sm"
-              title="cancel"
-            >
-                Cancel
-            </button>
-        </div>
-    )
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm"
+          onClick={onClose}
+          disabled={saving}
+          title="Cancel"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
 }
