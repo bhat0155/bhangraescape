@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import type { Member } from "@/app/types/members";
 import Image from "next/image";
+import { auth } from "@/app/api/auth/[...nextauth]/route";
+import MemberDetailClient from "@/app/components/MemberDetailClient";
 
 export default async function MemberDetailPage({params}: {params: {id: string}}){
     const BASE = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -15,28 +17,11 @@ export default async function MemberDetailPage({params}: {params: {id: string}})
 
     const member = (await res.json()) as Member;
 
+    const session = await auth();
+    const role = ((session?.user as any)?.role ?? "GUEST") as "GUEST" | "MEMBER" | "ADMIN";
+
+
     return (
-        <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-            {/* avatar */}
-            <div>
-                {member.avatarUrl ? (
-                    <Image
-                        src = {member.avatarUrl}
-                        alt = {member.name}
-                        width = {128}
-                        height={128}
-                        className="rounded-full"
-                    />
-                ) : (
-                    <div className="w-32 h-32 rounded-full bg-gray-200 grid place-items-center">
-                        <span>NA</span>
-                    </div>
-                )}
-            </div>
-            {/* Name */}
-            <h1 className="text-3xl font-bold">{member.name}</h1>
-            {/* Description */}
-            <p>{member.desctiption ?? "No description yet"}</p>
-        </div>
+        <MemberDetailClient role={role} member={member}/>
     )
 }
