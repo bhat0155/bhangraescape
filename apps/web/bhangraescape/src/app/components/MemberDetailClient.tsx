@@ -63,7 +63,8 @@ export default function MemberDetailClient({ member, role }: { member: Member; r
         <div className="mt-4">
           <AvatarEditor
             memberId={member.id}
-            initialUrl={member.avatarUrl ?? ""}
+            initialName={member.name}
+            initialDescription={member.description ?? ""}
             onClose={() => setOpen(false)}                 
             onDone={() => { setOpen(false); router.refresh(); }} 
           />

@@ -1,4 +1,3 @@
-// app/members/[id]/components/AvatarEditorUrl.tsx (CLIENT)
 "use client";
 
 import { useState } from "react";
@@ -11,71 +10,61 @@ type UploadStep = "IDLE" | "READY" | "PRESIGNING" | "UPLOADING" | "PATCHING" | "
 
 export default function AvatarEditorUrl({
   memberId,
-  initialUrl,
+  initialName,
+  initialDescription,
   onClose,
   onDone,
 }: {
   memberId: string;
-  initialUrl: string;
+  initialName: string;
+  initialDescription: string
   onClose: () => void; // called when user cancels
   onDone: () => void;  // called after successful save
 }) {
-  // upload direct url
-  const [url, setUrl] = useState(initialUrl);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
   // upload from machine
   const [file, setFile] = useState<File|null>(null);
   const [uploadStep, setUploadStep] = useState<UploadStep>("IDLE");
   const [uploadError, setUploadError] = useState<string|null>(null);
 
+  // states for description and name
+  const [name, setName] = useState(initialName);
+  const [description, setDescription]=useState(initialDescription)
+  const [saving, setSaving]=useState(false)
+  const [textError, setTextError]=useState<string|null>(null)
 
-  // tiny client guard: very light URL check
-  function looksLikeUrl(str: string) {
-    try {
-      new URL(str);
-      return true;
-    } catch {
-      return false;
-    }
+  async function handleSave(){
+     setTextError(null);
+     const nm = name.trim();
+     const dsc = description.trim();
+
+     if(!nm && !dsc){
+      setTextError("Nothing to update, please provide either name or description");
+      return;
+     }
+
+     setSaving(true)
+     try{
+        const body: Record<string, string> = {}
+        if(nm) body.name = nm;
+        if(dsc) body.description = dsc;
+
+        const res = await fetch(`/api/members/${memberId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        })
+        if(!res.ok){
+          const text = await res.text().catch((err)=>"");
+          throw new Error(`Save failed: ${text}`)
+        }
+        onDone()
+     }catch(err){
+        setTextError(`${err?.message || "Cannot update name and description"}`)
+     }finally{
+      setSaving(false)
+     }
   }
 
-  async function handleSave() {
-    setError(null);
-
-    // 1) basic client checks
-    if (!url.trim()) {
-      setError("Please enter an image URL.");
-      return;
-    }
-    if (!looksLikeUrl(url.trim())) {
-      setError("That doesn't look like a valid URL.");
-      return;
-    }
-
-    setSaving(true);
-    try {
-      // 2) call our PATCH proxy
-      const res = await fetch(`/api/members/${memberId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ avatarUrl: url.trim() }),
-      });
-
-      if (!res.ok) {
-        const t = await res.text();
-        throw new Error(`Save failed: ${res.status} ${t}`);
-      }
-
-      // 3) success → tell parent to close + refresh
-      onDone();
-    } catch (e: any) {
-      setError(e?.message ?? "Failed to save avatar.");
-    } finally {
-      setSaving(false);
-    }
-  }
 
   async function handleUploadAndPatch(){
     if(!file) return;
@@ -145,27 +134,11 @@ export default function AvatarEditorUrl({
 
   return (
     <div className="rounded-lg border p-3 space-y-2">
-      <div>
-        <label htmlFor="avatar-url" className="block text-sm font-medium">
-          Avatar URL
-        </label>
-        <input
-          id="avatar-url"
-          type="url"
-          placeholder="https://example.com/photo.jpg"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          className="input input-bordered w-full"
-          disabled={saving}
-        />
-      </div>
-
-      {error && <div className="text-sm text-red-600">{error}</div>}
 
       {/* file picker from machine */}
       <div className="mt-3 space-y-2">
         <label htmlFor="avatar-file" className="block text-sm font-medium">
-          or upload a new image
+         Upload an Image
         </label>
         <input
         type="file"
@@ -207,6 +180,31 @@ export default function AvatarEditorUrl({
         {uploadError && <div className="text-sm text-red-600">{uploadError}</div>}
       </div>
 
+      {/* name and description */}
+      <div>
+        <label className="block text-sm font-medium">Name: </label>
+      <input
+      type="text"
+      onChange={(ev)=> setName(ev.target.value)}
+      value={name}
+      placeholder="Make changes to name..."
+      className="input input-bordered w-full"
+       disabled={saving}
+      ></input>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium">Description: </label>
+      <input
+      type="text"
+      onChange={(ev)=> setDescription(ev.target.value)}
+      value={description}
+      placeholder="Make changes to description..."
+      className="input input-bordered w-full"
+       disabled={saving}
+      ></input>
+      </div>
+
       {/* Buttons */}
   
       <div className="flex items-center gap-6">
@@ -233,9 +231,9 @@ export default function AvatarEditorUrl({
           className="btn btn-primary btn-sm"
           onClick={handleSave}
           disabled={saving}
-          title="Save avatar URL"
+          title="Save"
         >
-          {saving ? "Saving…" : "Save (for url)"}
+          {saving ? "Saving…" : "Save (name and description)"}
         </button>
 
         {/* cancel */}
