@@ -2,6 +2,9 @@
 import { useState } from "react";
 import MediaGrid from "./MediaGrid";
 import type { MediaItem } from "../types/media";
+import { formatBytes } from "../utils/common";
+import { getExt } from "../utils/common";
+
 
 type Role = "GUEST" | "MEMBER" | "ADMIN";
 
@@ -14,17 +17,6 @@ type Props = {
 
 const MAX_FILE_SIZE = 60 * 1024 * 1024; // 60 MB
 
-function formatBytes(n: number) {
-  if (!Number.isFinite(n)) return "0 B";
-  const units = ["B", "KB", "MB", "GB"];
-  let i = 0;
-  let v = n;
-  while (v >= 1024 && i < units.length - 1) {
-    v /= 1024;
-    i++;
-  }
-  return `${v.toFixed(1)} ${units[i]}`;
-}
 
 type UploadStatus = "IDLE" | "READY" | "PRESIGNING" | "UPLOADING" | "REGISTERING" | "FAILED";
 
@@ -44,11 +36,6 @@ type UploadState = {
   presign?: PresignResponse
 };
 
-// helper function to grab file extension
-function getExt(name: string): string {
-    const i = name.lastIndexOf(".");
-    return i >= 0 ? name.slice(i+1).toLowerCase() : "";
-}
 
 // function for direct s3 upload
 async function directS3Upload(presign: PresignResponse, file: File){

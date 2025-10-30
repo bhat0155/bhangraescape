@@ -5,9 +5,9 @@ const BASE_API = process.env.NEXT_PUBLIC_API_BASE_URL!
 
 export async function POST(req: NextRequest, {params}: {params: {memberid: string}}){
     const body = await req.json();
-    const token = getToken({req, raw: true});
+    const token = await getToken({req, raw: true});
 
-    const upstream = await fetch(`${BASE_API}/uploads/${params.memberid}/presign`, {
+    const upstream = await fetch(`${BASE_API}/uploads/presign`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
