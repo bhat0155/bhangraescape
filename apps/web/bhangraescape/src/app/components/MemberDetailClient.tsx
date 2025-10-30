@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { Member } from "@/app/types/members";
 import AvatarEditor from "./AvatarEditor";
+import Link from "next/link";
 
 type Role = "GUEST" | "MEMBER" | "ADMIN";
 
@@ -17,6 +18,7 @@ export default function MemberDetailClient({ member, role }: { member: Member; r
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
       {/* Avatar row with an Edit button */}
+      <Link href="/members">  members page</Link>
       <div className="flex items-start gap-4">
         {member.avatarUrl ? (
           // If you use next/image, make sure the host is allowed in next.config images.domains
@@ -41,7 +43,7 @@ export default function MemberDetailClient({ member, role }: { member: Member; r
             onClick={() => isAdmin && setOpen(true)}
             title={isAdmin ? "Edit avatar" : "Only admins can edit"}
           >
-            Edit avatar
+            Edit Profile
           </button>
 
           {/* Optional: tooltip for non-admins on hover */}

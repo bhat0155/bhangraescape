@@ -221,7 +221,7 @@ export default function AvatarEditorUrl({
             uploadStep == "PRESIGNING" ? "presigning" :
             uploadStep == "UPLOADING" ? "uploading" :
             uploadStep == "PATCHING" ? "patching" :
-            "Upload and Save"
+            "Upload Image"
           }
         </button>
 

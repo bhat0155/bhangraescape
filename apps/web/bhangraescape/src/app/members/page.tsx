@@ -1,7 +1,13 @@
+import { auth } from "../api/auth/[...nextauth]/route";
+import AddMember from "../components/AddMember";
 import MemberCard from "../components/MembersCard";
 import type { Member } from "../types/members";
 
 export default async function MembersPage(){
+     const session = await auth();
+    const isAdmin = session?.user?.role === "ADMIN";
+
+
 const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
     const res = await fetch(`${origin}/api/members`, { cache: "no-store" });
     if(!res.ok){
@@ -10,6 +16,9 @@ const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
     const items =(await res.json()) as Member[];
    const members = items?.data;
+
+
+
 
     return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
@@ -20,6 +29,7 @@ const origin = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
         </div>
 
         {/* "Add Member" comes in Phase 3 (client modal). For now, just the list. */}
+        <AddMember isAdmin={isAdmin}/>
       </header>
 
       {members.length === 0 ? (
