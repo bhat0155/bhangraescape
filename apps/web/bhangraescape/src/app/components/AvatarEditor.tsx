@@ -8,7 +8,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 mb
 type UploadStep = "IDLE" | "READY" | "PRESIGNING" | "UPLOADING" | "PATCHING" | "FAILED";
 
 
-export default function AvatarEditorUrl({
+export default function AvatarEditor({
   memberId,
   initialName,
   initialDescription,
