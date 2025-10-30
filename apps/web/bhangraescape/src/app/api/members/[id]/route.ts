@@ -46,3 +46,27 @@ export async function PATCH(req: NextRequest, {params}: {params: {id: string}}){
     const json = await upstream.json();
     return NextResponse.json(json, {status: 200})
 }
+
+export async function DELETE(req: NextRequest, {params}: {params: {id: string}}){
+    const token = await getToken({req, raw: true})
+
+    const upstream = await fetch(`${BASE_API}/members/${params.id}`,{
+        method: "DELETE",
+         headers: {
+            "Content-Type": "application/json",
+            ...(token ? {Authorization: `Bearer ${token}`}: {})
+        },
+        cache: "no-store"
+    })
+
+    if(!upstream.ok){
+         const text = await upstream.text();
+        return NextResponse.json({error: text || "error in upstream"}, {status: upstream.status})
+    }
+    if(upstream.status == 204){
+        return new NextResponse(null, { status: 204 });
+    }
+
+    const json = await upstream.json();
+    return NextResponse.json(json, {status: 200})
+}

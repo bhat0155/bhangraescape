@@ -3,6 +3,7 @@ import type { Member } from "@/app/types/members";
 import Image from "next/image";
 import { auth } from "@/app/api/auth/[...nextauth]/route";
 import MemberDetailClient from "@/app/components/MemberDetailClient";
+import DeleteMemberButton from "@/app/components/DeleteMemberButton";
 
 export default async function MemberDetailPage({params}: {params: {id: string}}){
     const BASE = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -19,9 +20,12 @@ export default async function MemberDetailPage({params}: {params: {id: string}})
 
     const session = await auth();
     const role = ((session?.user as any)?.role ?? "GUEST") as "GUEST" | "MEMBER" | "ADMIN";
-
+    const isAdmin = role === "ADMIN"
 
     return (
-        <MemberDetailClient role={role} member={member}/>
+       <div>
+         <MemberDetailClient role={role} member={member}/>
+       {isAdmin &&   <DeleteMemberButton memberId = {member.id}/>}
+       </div>
     )
 }
