@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Instagram } from "lucide-react"; // ✅ lightweight icon from lucide-react
 
 export const metadata = {
   title: "About — BhangraEscape",
@@ -21,23 +22,36 @@ export default function About() {
         </h1>
 
         <p className="text-gray-700 leading-relaxed mb-4">
-          <span className="font-semibold text-indigo-800">BhangraScape</span>'s story is one of cultural connection and artistic expression. 
-          Founded in Ottawa, our team emerged from a simple desire to keep the spirit of Punjab alive through the dynamic art of Bhangra. 
+          <span className="font-semibold text-indigo-800">BhangraScape</span>'s story is one of cultural connection and artistic expression.
+          Founded in Ottawa, our team emerged from a simple desire to keep the spirit of Punjab alive through the dynamic art of Bhangra.
           In a land far from our roots, dance became our most powerful language—a way to celebrate, to remember, and to share.
         </p>
 
-        <p className="text-gray-700 leading-relaxed">
-          As our family grew, so did our ambition. We now attract dedicated dancers who blend technical skill with profound passion, 
-          crafting performances that are both authentic and exhilarating. 
-          Our core mission remains: to be steadfast custodians of our tradition and vibrant ambassadors of our culture. 
-          Through every beat and every step, we carry the essence of home with us, sharing its joy and energy with the world.
+        <p className="text-gray-700 leading-relaxed mb-6">
+          As our family grew, so did our ambition. We now attract dedicated dancers who blend technical skill with profound passion,
+          crafting performances that are both authentic and exhilarating. Our core mission remains: to be steadfast custodians of our
+          tradition and vibrant ambassadors of our culture. Through every beat and every step, we carry the essence of home with us,
+          sharing its joy and energy with the world.
         </p>
+
+       <div className="mt-8 flex items-center gap-3">
+            <a
+                href="https://www.instagram.com/bhangrascape/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 transition-colors duration-200"
+            >
+                <div className="p-2 rounded-full bg-indigo-100 hover:bg-indigo-200 transition-colors duration-200">
+                <Instagram className="w-5 h-5 text-indigo-600" />
+                </div>
+            </a>
+            </div>
       </div>
 
       {/* RIGHT IMAGE SECTION */}
       <div className="flex-1 relative min-h-[60vh] md:min-h-auto">
         <Image
-          src="/images/about.jpg" // place your image here (same name as uploaded)
+          src="/images/about.jpg"
           alt="BhangraEscape team performing"
           fill
           priority
