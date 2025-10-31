@@ -63,26 +63,32 @@ export default function Performers({
         {hasPerformers ? (
           <ul className="flex gap-6 overflow-x-auto sm:flex-wrap">
             {performers.map((p) => (
-              <li key={p.id} className="shrink-0 text-center">
-                <figure className="avatar mx-auto">
-                  {p.avatarUrl ? (
-                    <Image
-                      src={p.avatarUrl}
-                      alt={p.name}
-                      width={64}
-                      height={64}
-                      className="rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-full bg-base-300 grid place-items-center">
-                      <span className="text-sm font-semibold">
-                        {initials(p.name)}
-                      </span>
-                    </div>
-                  )}
-                </figure>
-                <div className="mt-2 text-sm">{p.name}</div>
-              </li>
+             <li key={p.id} className="shrink-0 text-center">
+          {/* Fixed circular frame */}
+          <div className="mx-auto w-20 h-20 rounded-full overflow-hidden bg-base-300">
+            {p.avatarUrl ? (
+              <div className="relative w-full h-full">
+                <Image
+                  src={p.avatarUrl}
+                  alt={p.name}
+                  fill
+                  sizes="80px"
+                  className="object-cover"
+                  // optional: fallback to initials if load fails
+                  onError={(e) => ((e.currentTarget as any).style.display = 'none')}
+                />
+              </div>
+            ) : (
+              <div className="w-full h-full grid place-items-center">
+                <span className="text-sm font-semibold">
+                  {initials(p.name)}
+                </span>
+              </div>
+            )}
+          </div>
+
+  <div className="mt-2 text-sm max-w-[8rem] truncate">{p.name}</div>
+</li>
             ))}
           </ul>
         ) : (
