@@ -266,7 +266,7 @@ export default function MediaManager({ eventId, role, initialMedia, token }: Pro
         <div className="relative inline-flex group">
           <button
             type="button"
-            className={`btn btn-primary btn-sm ${!isAdmin ? "btn-disabled opacity-70 cursor-not-allowed" : ""}`}
+            className={`btn btn-primary btn-sm px-4 py-2 ${!isAdmin ? "btn-disabled opacity-70 cursor-not-allowed" : ""}`}
             disabled={!isAdmin}
             onClick={() => isAdmin && setShowUploader((v) => !v)}
             aria-expanded={showUploader}
