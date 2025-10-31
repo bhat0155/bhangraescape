@@ -37,7 +37,7 @@ export default async function HomePage() {
   {/* Left Column: Image (Takes up 1/2 width on medium screens and up) */}
   <div className="relative h-full min-h-[40vh] md:min-h-[60vh]">
     <Image
-      src="/images/Hero2.jpeg"
+      src="/images/Hero3.jpeg"
       alt="BhangraEscape hero banner"
       fill
       priority
@@ -46,7 +46,7 @@ export default async function HomePage() {
       sizes="(max-width: 768px) 100vw, 50vw" // Image takes up 50% screen width on large screens
     />
     {/* Dark overlay over the image for contrast/style */}
-    <div className="absolute inset-0 bg-black/30" />
+    <div className="absolute inset-0 bg-black/10" />
   </div>
 
   {/* Right Column: Text Content (Takes up 1/2 width on medium screens and up) */}
