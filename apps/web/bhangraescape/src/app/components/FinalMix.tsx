@@ -28,7 +28,7 @@ export default function FinalMix({ title, url, role, eventId }: Props) {
     <section>
       <header className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Final Mix</h2>
-        {isAdmin && <FinalMixEditor eventId={eventId} initialTitle={title} initialUrl={url}/>}
+        {<FinalMixEditor eventId={eventId} initialTitle={title ?? ""} initialUrl={url ?? ""} role={role}/>}
       </header>
 
       {!url ? (
