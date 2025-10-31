@@ -57,7 +57,7 @@ export default function MemberDetailClient({
 
             <div className="relative inline-block">
             <div className="peer">
-              <button
+              {isAdmin && <button
                 type="button"
                 className="btn px-6 py-2 rounded-lg font-semibold tracking-wide 
                           bg-indigo-600 hover:bg-indigo-700 text-white transition-all
@@ -67,7 +67,7 @@ export default function MemberDetailClient({
                 title={isAdmin ? "Edit profile" : "Only admins can edit"}
               >
                 Edit Profile
-              </button>
+              </button>}
             </div>
 
             {!isAdmin && (

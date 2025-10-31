@@ -88,27 +88,44 @@ export default async function EventDetailPage({
 
       
       
-      {/* Toggle */}
-      <section className="space-y-3">
+    {/* Toggle */}
+{/* Interest toggle section */}
+{/* Performing Interest toggle */}
+<section className="w-full flex items-center justify-between mt-6 relative group">
 
+  {/* Left-aligned text */}
+  <h2 className="text-lg font-semibold text-gray-800">
+    Performing Interest
+  </h2>
 
-  {role === "GUEST" ? (
-    <div className="alert alert-info">
-      <span>Sign in to mark interest.</span>
-    </div>
-  ) : (
+  {/* Right-aligned toggle */}
+  <div className="relative inline-flex">
     <InterestedToggle
       eventId={data.event.id}
       role={role}
       canSet={data.capabilities?.canSetInterest ?? false}
       initialInterested={!!data.interested}
     />
-  )}
+
+    {/* Tooltip for guests only */}
+    {role === "GUEST" && (
+      <div
+        className="absolute right-0 top-full mt-2 hidden group-hover:flex
+                   items-center gap-2 bg-base-100 text-base-content text-sm font-medium
+                   border border-base-300 rounded-lg shadow-lg px-3 py-2 z-10 whitespace-nowrap"
+      >
+        <span role="img" aria-label="forbidden" className="text-error">🚫</span>
+        Only members can toggle interest
+      </div>
+    )}
+  </div>
 </section>
+  
+{/* </section> */}
 
       {/* availbility */}
      <section className="space-y-3">
-        <h2 className="text-xl font-semibold">Practice Availability</h2>
+        <h2 className="text-lg font-semibold text-gray-800">Practice Availability</h2>
         <AvailabilityPicker
           eventId={data.event.id}
           role={role}

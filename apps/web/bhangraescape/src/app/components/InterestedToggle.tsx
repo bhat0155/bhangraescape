@@ -69,7 +69,6 @@ export default function InterestedToggle({
 
   return (
     <div className="flex items-center justify-between gap-4 flex-nowrap w-full p-2 border-b border-gray-200">
-      <h2 className="text-xl font-semibold">Performing Interest</h2>
 
       <label
         className={`relative inline-flex items-center cursor-pointer transition-opacity duration-200 ${
