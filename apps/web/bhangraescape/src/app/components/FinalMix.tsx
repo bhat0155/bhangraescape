@@ -1,7 +1,10 @@
+import FinalMixEditor from "./FinalMixEditor";
 // Server Component: FinalMix.tsx
 type Props = {
   title?: string | null;
   url?: string | null;
+  eventId: string,
+  role : "ADMIN"|"GUEST"|"MEMBER"
 };
 
 function providerFromUrl(url?: string | null): "SOUNDCLOUD" | "SPOTIFY" | "YOUTUBE" | "EXTERNAL" | null {
@@ -18,13 +21,14 @@ function providerFromUrl(url?: string | null): "SOUNDCLOUD" | "SPOTIFY" | "YOUTU
   }
 }
 
-export default function FinalMix({ title, url }: Props) {
+export default function FinalMix({ title, url, role, eventId }: Props) {
   const provider = providerFromUrl(url);
-
+  const isAdmin = role === "ADMIN";
   return (
     <section>
       <header className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Final Mix</h2>
+        {isAdmin && <FinalMixEditor eventId={eventId} initialTitle={title} initialUrl={url}/>}
       </header>
 
       {!url ? (

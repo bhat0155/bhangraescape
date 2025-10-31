@@ -60,3 +60,25 @@ export async function POST(req: NextRequest){
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
+
+export async function PATCH(req: NextRequest, {params}: {params: {id: string}}){
+  const rawJWT = await getToken({ req, raw: true });
+  const body = await req.json();
+
+  const upstream = await fetch(`${API_BASE}/events/${params.id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...(rawJWT ? { Authorization: `Bearer ${rawJWT}` } : {}),
+    },
+    body: JSON.stringify(body),
+  });
+
+  const text = await upstream.text();
+  return new NextResponse(text, {
+    status: upstream.status,
+    headers: {
+      "content-type": upstream.headers.get("content-type") ?? "application/json",
+    },
+  });
+}

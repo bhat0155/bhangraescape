@@ -12,6 +12,7 @@ import MediaGrid from "@/app/components/MediaGrid";
 import FinalMix from "@/app/components/FinalMix";
 import PerformersEditor from "@/app/components/PerformersEditor";
 import MediaManager from "@/app/components/MediaManager";
+import FinalMixEditor from "@/app/components/FinalMixEditor";
 
 export default async function EventDetailPage({
   params,
@@ -118,7 +119,7 @@ export default async function EventDetailPage({
         />
       </section>
       {/* final Mix */}
-      <FinalMix title={finalTitle} url={finalUrl}/>
+      <FinalMix title={finalTitle} url={finalUrl} role={role} eventId={eventId} />
       {/* <MediaGrid items={mediaItems}></MediaGrid> */}
       <MediaManager eventId={event.id} role={role} initialMedia={mediaItems} token={token}/>
     </div>
