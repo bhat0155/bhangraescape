@@ -61,36 +61,36 @@ export default function Performers({
       {/* panel always renders */}
       <div className="rounded-xl bg-base-100 shadow p-4">
         {hasPerformers ? (
-          <ul className="flex gap-6 overflow-x-auto sm:flex-wrap">
-            {performers.map((p) => (
-             <li key={p.id} className="shrink-0 text-center">
-          {/* Fixed circular frame */}
-          <div className="mx-auto w-20 h-20 rounded-full overflow-hidden bg-base-300">
-            {p.avatarUrl ? (
-              <div className="relative w-full h-full">
-                <Image
-                  src={p.avatarUrl}
-                  alt={p.name}
-                  fill
-                  sizes="80px"
-                  className="object-cover"
-                  // optional: fallback to initials if load fails
-                  onError={(e) => ((e.currentTarget as any).style.display = 'none')}
-                />
-              </div>
-            ) : (
-              <div className="w-full h-full grid place-items-center">
-                <span className="text-sm font-semibold">
-                  {initials(p.name)}
-                </span>
-              </div>
-            )}
+          <ul
+  className="flex flex-nowrap gap-6 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent
+             pb-4 px-1 snap-x snap-mandatory"
+>
+  {performers.map((p) => (
+    <li key={p.id} className="shrink-0 text-center snap-start">
+      {/* Fixed circular frame */}
+      <div className="mx-auto w-20 h-20 rounded-full overflow-hidden bg-base-300">
+        {p.avatarUrl ? (
+          <div className="relative w-full h-full">
+            <Image
+              src={p.avatarUrl}
+              alt={p.name}
+              fill
+              sizes="80px"
+              className="object-cover"
+            />
           </div>
-
-  <div className="mt-2 text-sm max-w-[8rem] truncate">{p.name}</div>
-</li>
-            ))}
-          </ul>
+        ) : (
+          <div className="w-full h-full grid place-items-center">
+            <span className="text-sm font-semibold">
+              {initials(p.name)}
+            </span>
+          </div>
+        )}
+      </div>
+      <div className="mt-2 text-sm max-w-[6rem] truncate">{p.name}</div>
+    </li>
+  ))}
+</ul>
         ) : (
           <div className="text-sm opacity-70 text-center py-6">
             Such Empty, Much Wow.

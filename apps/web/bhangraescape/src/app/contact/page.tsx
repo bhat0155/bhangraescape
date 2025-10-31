@@ -11,7 +11,7 @@ export default function ContactPage() {
       {/* LEFT: Image with text on top */}
       <section className="relative h-[70vh] rounded-xl overflow-hidden">
         <Image
-          src="/images/contact.jpeg"
+          src="/images/about3.jpeg"
           alt="Bhangra troupe performing"
           fill
           priority
