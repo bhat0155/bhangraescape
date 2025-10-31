@@ -62,7 +62,7 @@ export default async function HomePage() {
         Experience the rhythm of traditional Bhangra.
       </p>
       <div className="pt-2 text-white">
-        <Link href="/join" className="btn btn-primary">
+        <Link href="/contact" className="btn btn-primary">
           Join Our Team
         </Link>
       </div>
