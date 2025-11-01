@@ -82,3 +82,23 @@ export async function PATCH(req: NextRequest, {params}: {params: {id: string}}){
     },
   });
 }
+
+export async function DELETE(req: NextRequest, {params}: {params: {id: string}}){
+  const rawJWT = await getToken({ req, raw: true });
+
+  const upstream = await fetch(`${API_BASE}/events/${params.id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      ...(rawJWT ? { Authorization: `Bearer ${rawJWT}` } : {}),
+    },
+  });
+
+  if(!upstream.ok){
+  const text = await upstream.text();
+ return NextResponse.json({ error: text || "Delete failed" }, { status: upstream.status });
+  }
+
+  return NextResponse.json({status: "deleted"}, {status: 200})
+}
+

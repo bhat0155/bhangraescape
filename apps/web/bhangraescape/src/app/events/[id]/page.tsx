@@ -13,6 +13,7 @@ import FinalMix from "@/app/components/FinalMix";
 import PerformersEditor from "@/app/components/PerformersEditor";
 import MediaManager from "@/app/components/MediaManager";
 import FinalMixEditor from "@/app/components/FinalMixEditor";
+import DeleteEvent from "@/app/components/DeleteEvent";
 
 export default async function EventDetailPage({
   params,
@@ -26,6 +27,7 @@ export default async function EventDetailPage({
   // user info
   const session = await auth();
   const role = (session?.user as any)?.role ?? "GUEST";
+  const isAdmin = role === "ADMIN"
   // read jwt from cookies and then pass it to express
   const token =
     cookies().get("__Secure-authjs.session-token")?.value ??
@@ -139,6 +141,9 @@ export default async function EventDetailPage({
       <FinalMix title={finalTitle} url={finalUrl} role={role} eventId={eventId} />
       {/* <MediaGrid items={mediaItems}></MediaGrid> */}
       <MediaManager eventId={event.id} role={role} initialMedia={mediaItems} token={token}/>
+
+      {/* Delete */}
+      {isAdmin && <DeleteEvent eventId={eventId} role={role}/>}
     </div>
   );
 }
