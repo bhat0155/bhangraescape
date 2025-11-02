@@ -43,7 +43,7 @@ export const patchMemberBodyAndParams = z.object({
 // /api/members/:memberId/role
 export const updateRoleBodyAndParams = z.object({
     params: z.object({
-        memberId: z.string().min(1)
+        id: z.string().min(1)
     }),
     body: z.object({
         role: z.enum(["ADMIN", "MEMBER", "GUEST"])
