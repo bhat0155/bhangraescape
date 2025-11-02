@@ -60,36 +60,24 @@ export default function MemberDetailClient({
               </h1>
 
             <div className="relative inline-block">
-            <div className="peer">
-              {isAdmin && <button
-                type="button"
-                className="btn px-6 py-2 rounded-lg font-semibold tracking-wide 
-                          bg-indigo-600 hover:bg-indigo-700 text-white transition-all
-                          cursor-pointer disabled:cursor-not-allowed disabled:opacity-100"
-                disabled={!isAdmin}
-                onClick={() => isAdmin && setOpen(true)}
-                title={isAdmin ? "Edit profile" : "Only admins can edit"}
-              >
-                Edit Profile
-              </button>}
-            </div>
+           {/* Actions row: edit + promote (side-by-side) */}
+              <div className="flex items-center gap-3">
+                {isAdmin && (
+                  <button
+                    type="button"
+                    className="btn btn-sm px-6 py-2 rounded-lg font-semibold
+                              bg-indigo-600 hover:bg-indigo-700 text-white transition"
+                    onClick={() => setOpen(true)}
+                    title="Edit profile"
+                  >
+                    Edit Profile
+                  </button>
+                )}
 
-            {!isAdmin && (
-              <div
-                className="absolute left-1/2 -translate-x-1/2 top-full mt-2
-                          hidden peer-hover:flex items-center gap-2
-                          bg-base-100 text-base-content text-sm font-medium
-                          border border-base-300 rounded-lg shadow-lg
-                          px-3 py-2 z-10 whitespace-nowrap"
-                role="tooltip"
-              >
-                🚫 Only admins can edit
+                {isAdmin && (
+                  <PromoteToAdmin memberId={member.id} memberRole={memberRole} />
+                )}
               </div>
-            )}
-
-            {isAdmin && (
-              <div><PromoteToAdmin memberId={member.id} memberRole={memberRole}/></div>
-            )}
           </div>
             </div>
           </div>
