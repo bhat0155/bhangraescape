@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { validate } from "../middlewares/validate";
 import { membersController } from "../controllers/members.controller";
-import { listMembersQuery, memberIdParam, createMemberBody, patchMemberBodyAndParams } from "../schemas/members.schemas";
+import { listMembersQuery, memberIdParam, createMemberBody, patchMemberBodyAndParams, updateRoleBodyAndParams } from "../schemas/members.schemas";
 import { authSession, requiredRole } from "../middlewares/auth";
 
 export const memberRouter = Router();
@@ -14,3 +14,4 @@ memberRouter.get("/:memberId", (req,res,next)=> validate(req,res,next, memberIdP
 memberRouter.post("/", authSession, requiredRole(["ADMIN"]),(req,res,next)=> validate(req,res,next, createMemberBody), membersController.create);
 memberRouter.patch("/:memberId",authSession, requiredRole(["ADMIN"]), (req,res,next)=> validate(req,res,next, patchMemberBodyAndParams), membersController.patch);
 memberRouter.delete("/:memberId", authSession, requiredRole(["ADMIN"]),(req,res,next)=> validate(req,res,next, memberIdParam), membersController.delete);
+memberRouter.patch("/:memberId/role",authSession, requiredRole(["ADMIN"]), (req,res,next)=> validate(req,res,next,updateRoleBodyAndParams ), membersController.promote);

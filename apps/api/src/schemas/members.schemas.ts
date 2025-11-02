@@ -39,7 +39,20 @@ export const patchMemberBodyAndParams = z.object({
     return !!(b.name||b.avatarUrl||b.description)
 },{message: "Provide at least one field to update (name, avatarUrl, description)."})
 
+
+// /api/members/:memberId/role
+export const updateRoleBodyAndParams = z.object({
+    params: z.object({
+        memberId: z.string().min(1)
+    }),
+    body: z.object({
+        role: z.enum(["ADMIN", "MEMBER", "GUEST"])
+    })
+    
+})
+
 export type listMemeberQueryInput = z.infer<typeof listMembersQuery>;
 export type memberIdParamInput = z.infer<typeof memberIdParam>;
 export type createMemberBodyInput = z.infer<typeof createMemberBody>;
 export type createMemberBodyType = z.infer<typeof createMemberBody>
+export type updateRoleAndBodyType = z.infer<typeof updateRoleBodyAndParams>

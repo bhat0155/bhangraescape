@@ -1,6 +1,7 @@
-import { ok } from "assert";
 import { createMemberBodyType } from "../schemas/members.schemas";
 import { prisma } from "../lib/prisma";
+
+type Role = "ADMIN"| "MEMBER"| "GUEST";
 
 const userSelect ={
                 id: true,
@@ -59,6 +60,24 @@ export const memberService = {
             throw err;
         }
     },
+       // update role
+    async promote(memberId: string, role: Role){
+        try{
+            const updated = await prisma.user.update({
+                where: {id: memberId},
+                data: {role},
+                select: userSelect
+            })
+            return updated;
+        }catch(err: any){
+            if(err.code == "P2025"){
+                const e: any = new Error("Member not found");
+                e.status=404;
+                throw e;
+            }
+            throw err;
+        }
+    },
 
 
     async remove(memberId: string){
@@ -72,4 +91,6 @@ export const memberService = {
         }
         return {success: true, message: "user deleted"};
     }
+
+ 
 }

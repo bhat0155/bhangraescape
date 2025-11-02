@@ -44,6 +44,16 @@ export const membersController = {
         }
     },
 
+    async promote(req: Request, res: Response, next: NextFunction){
+        try{
+            const {params, body}= (req as any).validated ?? {params: req.params, body: req.body};
+            const data = await memberService.promote(params.memberId, body.role);
+            res.status(200).json({ status: "success", data });
+        }catch(err){
+            next(err)
+        }
+    },
+
     async delete(req: Request, res: Response, next: NextFunction){
         try{
             const {params} = (req as any).validated ?? {params:req.params};
