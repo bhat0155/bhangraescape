@@ -5,36 +5,37 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "../../../../../lib/prisma";
 
 
-
 export const { handlers: { GET, POST }, auth } = NextAuth({
-  // IMPORTANT: pass your env vars to the provider
   adapter: PrismaAdapter(prisma),
   providers: [
     Google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,        // from .env.local
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,// from .env.local
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
   session: { strategy: "jwt" },
-  // (optional but useful) read NEXTAUTH_SECRET/NEXTAUTH_URL from env automatically
-  // trustHost: true, // uncomment if you use a custom dev host or proxy
   callbacks: {
     async jwt({ token, user }) {
-      // first login: user is defined → copy things into the token
-       if (user) {
-      // Fetch role from DB if needed (Prisma) or hardcode for your account
-      if (user.email === "ekamsingh643@gmail.com") {
-        token.role = "ADMIN";  
-      } else {
-        token.role = "GUEST";
-      }
-    }
+      // Keep token lean; do not set role here.
+      // token.sub contains the user id after first login.
       return token;
     },
     async session({ session, token }) {
+      // Expose user id on session
       if (session.user) {
         (session.user as any).id = (token as any).sub ?? (token as any).id ?? null;
-        (session.user as any).role = (token as any).role ?? "GUEST";
+      }
+
+      // Read the latest role from DB every time
+      const userId = (token as any).sub ?? null;
+      if (userId) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { role: true },
+        });
+        (session.user as any).role = dbUser?.role ?? "GUEST";
+      } else {
+        (session.user as any).role = "GUEST";
       }
       return session;
     },
