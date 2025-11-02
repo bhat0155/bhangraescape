@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Member } from "@/app/types/members";
 import { useRouter } from "next/navigation";
 import AvatarEditor from "./AvatarEditor";
+import PromoteToAdmin from "./PromoteToAdmin";
 
 type Role = "GUEST" | "MEMBER" | "ADMIN";
 
@@ -16,7 +17,10 @@ export default function MemberDetailClient({
 }) {
   const router = useRouter();
   const isAdmin = role === "ADMIN";
+  const memberRole = member?.role === "ADMIN"
   const [open, setOpen] = useState(false);
+
+  console.log({memberRole})
 
   const initials =
     member.name
@@ -81,6 +85,10 @@ export default function MemberDetailClient({
               >
                 🚫 Only admins can edit
               </div>
+            )}
+
+            {isAdmin && (
+              <div><PromoteToAdmin memberId={member.id} memberRole={memberRole}/></div>
             )}
           </div>
             </div>

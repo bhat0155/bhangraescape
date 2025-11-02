@@ -14,30 +14,20 @@ export const { handlers: { GET, POST }, auth } = NextAuth({
     }),
   ],
   session: { strategy: "jwt" },
-  callbacks: {
-    async jwt({ token, user }) {
-      // Keep token lean; do not set role here.
-      // token.sub contains the user id after first login.
-      return token;
-    },
-    async session({ session, token }) {
-      // Expose user id on session
-      if (session.user) {
-        (session.user as any).id = (token as any).sub ?? (token as any).id ?? null;
-      }
-
-      // Read the latest role from DB every time
-      const userId = (token as any).sub ?? null;
-      if (userId) {
-        const dbUser = await prisma.user.findUnique({
-          where: { id: userId },
-          select: { role: true },
-        });
-        (session.user as any).role = dbUser?.role ?? "GUEST";
-      } else {
-        (session.user as any).role = "GUEST";
-      }
-      return session;
-    },
+ callbacks: {
+  async jwt({ token, user }) {
+    if (user) {
+      const dbUser = await prisma.user.findUnique({ where: { id: user.id }, select: { role: true } });
+      token.role = dbUser?.role ?? "GUEST";
+    }
+    return token;
   },
+  async session({ session, token }) {
+    if (session.user) {
+      (session.user as any).role = token.role ?? "GUEST";
+    }
+    return session;
+  },
+}
+
 });
