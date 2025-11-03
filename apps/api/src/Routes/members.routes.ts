@@ -14,4 +14,4 @@ memberRouter.get("/:memberId", (req,res,next)=> validate(req,res,next, memberIdP
 memberRouter.post("/", authSession, requiredRole(["ADMIN"]),(req,res,next)=> validate(req,res,next, createMemberBody), membersController.create);
 memberRouter.patch("/:memberId",authSession, requiredRole(["ADMIN"]), (req,res,next)=> validate(req,res,next, patchMemberBodyAndParams), membersController.patch);
 memberRouter.delete("/:memberId", authSession, requiredRole(["ADMIN"]),(req,res,next)=> validate(req,res,next, memberIdParam), membersController.delete);
-memberRouter.patch("/:memberId/role",authSession, requiredRole(["ADMIN"]), (req,res,next)=> validate(req,res,next,updateRoleBodyAndParams ), membersController.promote);
+memberRouter.patch("/:id/role",authSession, requiredRole(["ADMIN"]), (req,res,next)=> validate(req,res,next,updateRoleBodyAndParams ), membersController.promote);
