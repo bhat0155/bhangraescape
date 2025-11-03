@@ -32,69 +32,66 @@ export default function Navbar() {
   const close = () => setOpen(false);
 
   return (
-    <header className="border-b bg-base-100">
-      {/* ✨ Make the container relative so we can absolutely position the burger */}
-      <div className="container mx-auto w-full max-w-6xl relative">
-        {/* Top bar: Left / Center / Right (desktop layout unchanged) */}
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center h-14">
-          {/* LEFT: Brand */}
-          <div className="justify-self-start">
-            <Link href="/" className="btn btn-ghost text-xl">BhangraScape</Link>
-          </div>
+  <header className="border-b bg-base-100">
+  <div className="container mx-auto w-full max-w-6xl">
+    {/* Top bar: 3 fixed areas → left / center / right */}
+    <div className="grid grid-cols-[auto_1fr_auto] items-center h-14">
+      {/* LEFT: brand */}
+      <Link href="/" className="btn btn-ghost text-xl">BhangraScape</Link>
 
-          {/* CENTER: Desktop nav */}
-          <nav className="hidden sm:flex gap-5 justify-self-center whitespace-nowrap">
-            <NavLink href="/">Home</NavLink>
-            <NavLink href="/events">Events</NavLink>
-            <NavLink href="/members">Members</NavLink>
-            <NavLink href="/about">About</NavLink>
-            <NavLink href="/contact">Contact</NavLink>
-          </nav>
+      {/* CENTER: desktop nav */}
+      <nav className="hidden sm:flex gap-5 justify-center">
+        <NavLink href="/">Home</NavLink>
+        <NavLink href="/events">Events</NavLink>
+        <NavLink href="/members">Members</NavLink>
+        <NavLink href="/about">About</NavLink>
+        <NavLink href="/contact">Contact</NavLink>
+      </nav>
 
-          {/* RIGHT: Desktop auth only (burger removed from here) */}
-          <div className="justify-self-end shrink-0 whitespace-nowrap hidden sm:block">
-            <AuthButtons />
-          </div>
+
+
+<div className="ml-auto sm:ml-0 flex items-center justify-end w-12 sm:w-auto">
+  {/* Desktop auth (≥ sm) */}
+  <div className="hidden sm:block">
+    <AuthButtons />
+  </div>
+
+  {/* Mobile burger (≤ sm) */}
+  <button
+    type="button"
+    className="sm:hidden inline-grid place-items-center w-10 h-10 btn btn-ghost"
+    aria-label="Toggle menu"
+    aria-expanded={open}
+    onClick={() => setOpen(v => !v)}
+  >
+    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d={open ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+      />
+    </svg>
+  </button>
+</div>
+    </div>
+
+    {/* Mobile menu (below bar; expanding this won't move the button) */}
+    <div className={`sm:hidden overflow-hidden transition-[max-height] duration-300 ${open ? "max-h-96" : "max-h-0"}`}>
+      <nav className="flex flex-col gap-1 py-2 border-t">
+        <NavLink href="/" onClick={close}>Home</NavLink>
+        <NavLink href="/events" onClick={close}>Events</NavLink>
+        <NavLink href="/members" onClick={close}>Members</NavLink>
+        <NavLink href="/about" onClick={close}>About</NavLink>
+        <NavLink href="/contact" onClick={close}>Contact</NavLink>
+
+        {/* Auth inside mobile menu, centered */}
+        <div className="pt-3 border-t flex justify-center">
+          <AuthButtons />
         </div>
-
-        {/* ✨ ABSOLUTE burger: extreme right on mobile */}
-        <button
-          type="button"
-          className="sm:hidden absolute right-3 top-1/2 -translate-y-1/2 btn btn-ghost"
-          aria-label="Toggle menu"
-          aria-expanded={open}
-          onClick={() => setOpen(v => !v)}
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d={open ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
-            />
-          </svg>
-        </button>
-
-        {/* Mobile menu (slide-down) */}
-        <div
-          className={`sm:hidden overflow-hidden transition-[max-height] duration-300 ${
-            open ? "max-h-96" : "max-h-0"
-          }`}
-        >
-          <nav className="flex flex-col gap-1 py-2 border-t">
-            <NavLink href="/" onClick={close}>Home</NavLink>
-            <NavLink href="/events" onClick={close}>Events</NavLink>
-            <NavLink href="/members" onClick={close}>Members</NavLink>
-            <NavLink href="/about" onClick={close}>About</NavLink>
-            <NavLink href="/contact" onClick={close}>Contact</NavLink>
-
-            {/* AuthButtons centered in the mobile menu */}
-            <div className="pt-3 border-t flex justify-center">
-              <AuthButtons />
-            </div>
-          </nav>
-        </div>
-      </div>
-    </header>
+      </nav>
+    </div>
+  </div>
+</header>
   );
 }
