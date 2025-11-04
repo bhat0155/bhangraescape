@@ -77,7 +77,7 @@ export default async function EventsPage({
             {/* Header with title and optional search form */}
         <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
   {/* Left: title */}
-  <h1 className="text-4xl font-extrabold text-primary">Upcoming Events</h1>
+  <h1 className="text-4xl font-extrabold text-primary">Events</h1>
 
   {/* Middle: create button */}
   <div className="flex justify-center sm:justify-center">
@@ -93,10 +93,10 @@ export default async function EventsPage({
     <input
       name="search"
       defaultValue={search ?? ""}
-      placeholder="Search title or location"
+      placeholder="Search the event..."
       className="input input-bordered w-full"
     />
-    <button type="submit" className="btn btn-primary">
+    <button type="submit" className="btn btn-primary py-4 px-2 bg-indigo-600 hover:bg-indigo-700 text-white">
       Search
     </button>
   </form>

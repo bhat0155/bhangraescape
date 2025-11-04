@@ -34,7 +34,7 @@ export default function AuthButtons() {
         {/* <span className="hidden md:inline-block max-w-[160px] truncate">Hi, {name}</span> */}
       </span>
 
-      <button className="btn btn-sm btn-outline" onClick={() => signOut()}>
+      <button className="btn btn-sm btn-outline py-4 px-2 bg-indigo-600 hover:bg-indigo-700 text-white" onClick={() => signOut()}>
         Logout
       </button>
     </div>

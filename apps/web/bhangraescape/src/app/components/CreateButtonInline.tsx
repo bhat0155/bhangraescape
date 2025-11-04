@@ -21,7 +21,7 @@ export default function CreateButtonInline({ role }: { role: Role }) {
         type="button"
         onClick={handleClick}
         disabled={!isAdmin}
-        className={`btn btn-primary ${!isAdmin ? "btn-disabled cursor-not-allowed" : ""}`}
+        className={`btn btn-primary py-4 px-2 bg-indigo-600 hover:bg-indigo-700 text-white ${!isAdmin ? "btn-disabled cursor-not-allowed" : ""}`}
       >
         Add an Event
       </button>
