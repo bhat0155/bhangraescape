@@ -13,7 +13,7 @@ export default function AuthButtons() {
   if (!session) {
     return (
       <button
-        className="btn btn-sm btn-neutral whitespace-nowrap"
+        className="btn btn-sm btn-neutral whitespace-nowrap py-4 px-2 bg-indigo-600 text-white"
         onClick={() => signIn("google")}
       >
         Login
