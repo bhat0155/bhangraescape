@@ -110,7 +110,7 @@ className={`btn btn-primary btn-sm px-4 py-2 ${!isAdmin ? "btn-disabled opacity-
         <div className="mt-3 rounded-xl border border-base-300 bg-base-100 p-4 shadow-sm w-[min(36rem,90vw)]">
           <div className="space-y-3">
             <div>
-              <label className="block text-sm font-medium">Title (optional)</label>
+              <label className="block text-sm font-medium">Title (mandatory)</label>
               <input
                 className="input input-bordered w-full"
                 value={title}
