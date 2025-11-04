@@ -15,7 +15,7 @@ type Props = {
   token: string | null;
 };
 
-const MAX_FILE_SIZE = 60 * 1024 * 1024; // 60 MB
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
 
 
 type UploadStatus = "IDLE" | "READY" | "PRESIGNING" | "UPLOADING" | "REGISTERING" | "FAILED";
