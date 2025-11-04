@@ -146,7 +146,7 @@ export default function MediaManager({ eventId, role, initialMedia, token }: Pro
             setUploadState((s)=> ({
                 ...s,
                 status: "FAILED",
-                errorMessage: "Direct S3 upload failed. Please try again.",
+                errorMessage: "Direct S3 upload failed. Please refresh page and try again.",
             }))
         }
 
@@ -293,14 +293,31 @@ export default function MediaManager({ eventId, role, initialMedia, token }: Pro
           )}
         </div>
       </header>
+     
 
       {/* Uploader */}
       {showUploader && (
+        
         <div
           id="media-uploader"
           className="rounded-xl bg-base-100 border border-base-300 p-4 shadow-sm space-y-3"
         >
           <div className="text-xs opacity-70">Max file size: {formatBytes(MAX_FILE_SIZE)}</div>
+           <div className="max-w-md">
+            <label htmlFor="media-title" className="block text-sm font-medium mb-1">
+                Title (Mandatory)
+                {/* NEW: Added red asterisk for mandatory field */}
+                <span className="text-error ml-1">*</span> 
+            </label>
+            <input
+            type="text"
+            className="input input-bordered input-sm w-full"
+            placeholder="e.g., Group pose, Crown lift, Full routine"
+            onChange={(ev)=> setTitle(ev.target.value)}
+            disabled={uploadState.status === "PRESIGNING" || uploadState.status === "UPLOADING"}
+             >
+            </input>
+          </div>
 
           {/* dashed dropzone look (click to open) */}
           <label
@@ -345,20 +362,7 @@ export default function MediaManager({ eventId, role, initialMedia, token }: Pro
             )}
           </div>
 
-          {/* Title input box */}
-          <div className="max-w-md">
-            <label htmlFor="media-title" className="block text-sm font-medium mb-1">
-                Title (Mandatory)
-            </label>
-            <input
-            type="text"
-            className="input input-bordered input-sm w-full"
-            placeholder="e.g., Group pose, Crown lift, Full routine"
-            onChange={(ev)=> setTitle(ev.target.value)}
-            disabled={uploadState.status === "PRESIGNING" || uploadState.status === "UPLOADING"}
-             >
-            </input>
-          </div>
+         
 
           {/* actions */}
 <div className="flex items-center gap-2 pt-1">
