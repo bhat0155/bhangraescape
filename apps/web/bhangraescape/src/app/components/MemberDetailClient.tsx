@@ -5,6 +5,7 @@ import type { Member } from "@/app/types/members";
 import { useRouter } from "next/navigation";
 import AvatarEditor from "./AvatarEditor";
 import PromoteToAdmin from "./PromoteToAdmin";
+import DeleteMemberButton from "./DeleteMemberButton";
 
 type Role = "GUEST" | "MEMBER" | "ADMIN";
 
@@ -116,6 +117,13 @@ export default function MemberDetailClient({
           
             </div>
           )}
+
+          {isAdmin && (
+            <div className="flex justify-center mt-6">
+              <DeleteMemberButton memberId={member.id} />
+            </div>
+          )}
+
         </div>
       </div>
     </div>

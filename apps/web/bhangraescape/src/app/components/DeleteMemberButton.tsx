@@ -29,19 +29,30 @@ export default function DeleteMemberButton({ memberId }: { memberId: string }) {
     }
   }
 
-  return (
-    <div className="mt-4">
-      <button
-        type="button"
-        className="btn btn-error btn-sm inline-flex items-center gap-2"
-        onClick={handleDelete}
-        disabled={deleting}
-        title="Delete this member"
-      >
-        <Trash2 size={16} />
-        {deleting ? "Deleting…" : "Delete"}
-      </button>
-      {err && <div className="text-sm text-red-600 mt-2">{err}</div>}
-    </div>
-  );
+return (
+  <div className="mt-6 text-center">
+    <button
+      type="button"
+      onClick={handleDelete}
+      disabled={deleting}
+      title="Delete this member"
+      className={`inline-flex items-center justify-center gap-2
+                  px-6 py-2.5 rounded-lg font-semibold text-white
+                  transition-all duration-200
+                  ${deleting
+                    ? "bg-rose-300 cursor-not-allowed"
+                    : "bg-rose-500 hover:bg-rose-600 active:bg-rose-700 shadow-sm"
+                  }`}
+    >
+      <Trash2 size={18} />
+      {deleting ? "Deleting…" : "Delete Member"}
+    </button>
+
+    {err && (
+      <div className="text-sm text-rose-600 mt-3 font-medium">
+        {err}
+      </div>
+    )}
+  </div>
+);
 }
