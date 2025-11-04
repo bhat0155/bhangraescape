@@ -92,7 +92,7 @@ export default function MediaManager({ eventId, role, initialMedia, token }: Pro
         const payload = {
             prefix: "events",
             contentType,
-            ext
+            ext,
         }
 
         // calling the s3 endpoint
