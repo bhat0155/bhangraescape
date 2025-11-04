@@ -32,7 +32,7 @@ type RegisterMediaInput = {
 export async function presignUpload({
   prefix,
   contentType,
-  maxSizeMb = 5,
+  maxSizeMb = 100,
   ext,
   userId,
 }: PresignOpts) {
