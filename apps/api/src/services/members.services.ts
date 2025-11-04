@@ -10,7 +10,8 @@ const userSelect ={
                 description: true,
                 role: true,
                 createdAt: true,
-                updatedAt: true
+                updatedAt: true,
+                email: true
 }
 
 export const memberService = {
@@ -29,15 +30,31 @@ export const memberService = {
         })
     },
 
-    async createMember(data: createMemberBodyType){
-        return prisma.user.create({ 
-            data: {
-                ...data,
-                role: "MEMBER"
-            },
-             select: userSelect
-        })
-    },
+    async createMember(data: createMemberBodyType) {
+  const existing = await prisma.user.findUnique({
+    where: { email: data.email },
+    select: userSelect,
+  });
+
+  if (existing) {
+    return prisma.user.update({
+      where: { email: data.email },
+      data: {
+        name: data.name,
+        description: data.description,
+        avatarUrl: data.avatarUrl,
+        role: "MEMBER",       // promote existing login
+      },
+      select: userSelect,
+    });
+  }
+
+  return prisma.user.create({
+    data: { ...data, role: "MEMBER" },
+    select: userSelect,
+  });
+},
+
 
     async patch(memberId: string, partial: {name?:string, avatarUrl?: string, description?: string}){
         try{

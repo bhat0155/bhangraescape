@@ -19,7 +19,8 @@ export const createMemberBody = z.object({
     body: z.object({
         name: z.string().min(1).max(100),
         avatarUrl: z.string().url(),
-        description: z.string().min(1).max(2000)
+        description: z.string().min(1).max(2000),
+        email: z.string().email()
     })
 })
 
