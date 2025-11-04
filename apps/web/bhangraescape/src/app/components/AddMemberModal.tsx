@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 export default function AddMemberModal({onClose}: {onClose: () => void}){
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
+    const [email, setEmail]=useState("")
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string|null>(null);
     const router = useRouter()
@@ -15,13 +16,15 @@ export default function AddMemberModal({onClose}: {onClose: () => void}){
         const body: Record<string, string> = {};
         const nm = name.trim();
         const dsc = description.trim();
+        const em = email.trim().toLowerCase();
 
-        if(!nm || !dsc){
-            setError("Name and desciption are mandatory attributes");
+        if(!nm || !dsc || !em){
+            setError("Name, Email and desciption are mandatory attributes");
             return;
         }
         if(nm) body.name = nm;
         if (dsc) body.description = dsc
+        if (em) body.email = em;
         body.avatarUrl = "https://placehold.co/100x100"
         setSaving(true)
 
@@ -49,6 +52,9 @@ export default function AddMemberModal({onClose}: {onClose: () => void}){
 
         <label className="block text-sm">Name</label>
         <input className="input input-bordered w-full" value={name} onChange={(e)=>setName(e.target.value)} disabled={saving} />
+
+         <label className="block text-sm">Email</label>
+        <input className="input input-bordered w-full" value={email} onChange={(e)=>setEmail(e.target.value)} disabled={saving} />
 
         <label className="block text-sm">Description</label>
         <textarea className="textarea textarea-bordered w-full" value={description} onChange={(e)=>setDescription(e.target.value)} disabled={saving} />

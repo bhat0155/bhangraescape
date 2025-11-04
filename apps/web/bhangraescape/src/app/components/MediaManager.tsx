@@ -305,8 +305,7 @@ export default function MediaManager({ eventId, role, initialMedia, token }: Pro
           <div className="text-xs opacity-70">Max file size: {formatBytes(MAX_FILE_SIZE)}</div>
            <div className="max-w-md">
             <label htmlFor="media-title" className="block text-sm font-medium mb-1">
-                Title (Mandatory)
-                {/* NEW: Added red asterisk for mandatory field */}
+                Title
                 <span className="text-error ml-1">*</span> 
             </label>
             <input
