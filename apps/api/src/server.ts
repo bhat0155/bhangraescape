@@ -24,7 +24,7 @@ app.use(helmet({
 }));  // security headers
 
 app.use(cors({
-    origin: [NEXT_DEV_ORIGIN],
+    origin: ['https://bhangrascape.ca', 'https://www.bhangrascape.ca'],
     credentials: true,
     methods: ["GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
