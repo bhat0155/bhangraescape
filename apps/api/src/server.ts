@@ -15,7 +15,8 @@ import {finalMixRouter} from './Routes/finalmix.route';
 import { bearerAuth } from './middlewares/bearAuth';
 import adminRouter from './Routes/admin.route';
 
-const NEXT_DEV_ORIGIN = process.env.NEXT_DEV_ORIGIN || 'http://localhost:3000';
+const devOrigin = process.env.NEXT_DEV_ORIGIN ?? 'http://localhost:3000';
+
 // loads env
 dotenv.config();
 const app = express();
@@ -24,7 +25,7 @@ app.use(helmet({
 }));  // security headers
 
 app.use(cors({
-    origin: ['https://bhangrascape.ca', 'https://www.bhangrascape.ca'],
+    origin: ['https://bhangrascape.ca', 'https://www.bhangrascape.ca', devOrigin],
     credentials: true,
     methods: ["GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
