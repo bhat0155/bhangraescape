@@ -3,10 +3,9 @@ import { getToken } from "next-auth/jwt";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
-type Parameter = { params: Promise<{ id: string }> };
 
-export async function POST(req: NextRequest, parameter: Parameter){
-  const {id} = await parameter.params;
+export async function POST(req: NextRequest,  context: { params: Promise<{ id: string }> }){
+  const {id} = await context.params
     // read the jwt from browser
     const rawJWT = await getToken({req, raw: true});
     const payload = await req.json();

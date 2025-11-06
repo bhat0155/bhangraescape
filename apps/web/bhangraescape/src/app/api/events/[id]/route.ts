@@ -83,10 +83,11 @@ export async function PATCH(req: NextRequest, {params}: {params: {id: string}}){
   });
 }
 
-export async function DELETE(req: NextRequest, {params}: {params: {id: string}}){
+export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }>}){
+  const {id} = await context.params;
   const rawJWT = await getToken({ req, raw: true });
 
-  const upstream = await fetch(`${API_BASE}/events/${params.id}`, {
+  const upstream = await fetch(`${API_BASE}/events/${id}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import AvatarEditor from "./AvatarEditor";
 import PromoteToAdmin from "./PromoteToAdmin";
 import DeleteMemberButton from "./DeleteMemberButton";
+import Link from "next/link";
 
 type Role = "GUEST" | "MEMBER" | "ADMIN";
 
@@ -33,9 +34,9 @@ export default function MemberDetailClient({
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
-      <a href="/members" className="btn btn-ghost btn-sm mb-6">
+      <Link href="/members" className="btn btn-ghost btn-sm mb-6">
         ← Back to Members
-      </a>
+      </Link>
 
       <div className="card w-full bg-white shadow-xl border border-gray-100">
         <div className="card-body p-8 lg:p-12 space-y-8">

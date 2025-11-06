@@ -1,13 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 
-export async function GET(req: NextRequest, {params}: {params: {id: string}}){
+export async function GET(req: NextRequest, context: { params: Promise<{ id: string }>}){
+    const id = await context.params
     const rawJWT = await getToken({req, raw: true});
 
-    const upstream = await fetch(`${API_BASE}/events/${params.id}/performers`, {
+    const upstream = await fetch(`${API_BASE}/events/${id}/performers`, {
         method: "GET",
         headers: {
       ...(rawJWT ? { Authorization: `Bearer ${rawJWT}` } : {}),

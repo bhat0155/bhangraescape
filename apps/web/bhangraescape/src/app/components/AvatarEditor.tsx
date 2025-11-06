@@ -246,6 +246,7 @@ export default function AvatarEditor({
         >
           Cancel
         </button>
+        {textError && <div>{textError}</div>}
       </div>
     </div>
   );

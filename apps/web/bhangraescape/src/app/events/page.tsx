@@ -1,5 +1,4 @@
 import EventCard from "../components/EventCard";
-import { getRelativeTime } from "../lib/time";
 import { auth } from "@/app/api/auth/[...nextauth]/route"; 
 import CreateButtonInline from "../components/CreateButtonInline";
 

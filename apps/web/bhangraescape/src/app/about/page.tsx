@@ -22,7 +22,7 @@ export default function About() {
         </h1>
 
         <p className="text-gray-700 leading-relaxed mb-4">
-          <span className="font-semibold text-indigo-800">BhangraScape</span>'s story is one of cultural connection and artistic expression.
+          <span className="font-semibold text-indigo-800">BhangraScape</span>: Our story is one of cultural connection and artistic expression.
           Founded in Ottawa, our team emerged from a simple desire to keep the spirit of Punjab alive through the dynamic art of Bhangra.
           In a land far from our roots, dance became our most powerful language—a way to celebrate, to remember, and to share.
         </p>

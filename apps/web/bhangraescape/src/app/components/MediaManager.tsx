@@ -57,6 +57,7 @@ async function directS3Upload(presign: PresignResponse, file: File){
     // s3 returns 204 on success
     if(resS3.status !=204){
         const errorText = await resS3.text().catch((err)=>console.log(err));
+        console.log(errorText)
         throw new Error(`Direct S3 upload failed. Status ${resS3.status}. ${resS3 || ""}`.trim())
     }
 }

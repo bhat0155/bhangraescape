@@ -4,13 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react"; // nice delete icon
 
-type Role = "GUEST" | "ADMIN" | "MEMBER";
+
 
 export default function DeleteEvent({
-  role,
+
   eventId,
 }: {
-  role: Role;
+
   eventId: string;
 }) {
   const [deleting, setDeleting] = useState(false);

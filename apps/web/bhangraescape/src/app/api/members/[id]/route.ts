@@ -24,11 +24,12 @@ export async function GET(_req: NextRequest, {params}:{params: {id: string}}){
     return NextResponse.json(json, {status: 200})
 }
 
-export async function PATCH(req: NextRequest, {params}: {params: {id: string}}){
+export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }>}){
+    const {id}=await context.params
     const body = await req.json();
     const raw = await getToken({req, raw: true})
 
-    const upstream = await fetch(`${BASE_API}/members/${params.id}`, {
+    const upstream = await fetch(`${BASE_API}/members/${id}`, {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",
@@ -47,10 +48,11 @@ export async function PATCH(req: NextRequest, {params}: {params: {id: string}}){
     return NextResponse.json(json, {status: 200})
 }
 
-export async function DELETE(req: NextRequest, {params}: {params: {id: string}}){
+export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }>}){
+    const {id}=await context.params
     const token = await getToken({req, raw: true})
 
-    const upstream = await fetch(`${BASE_API}/members/${params.id}`,{
+    const upstream = await fetch(`${BASE_API}/members/${id}`,{
         method: "DELETE",
          headers: {
             "Content-Type": "application/json",

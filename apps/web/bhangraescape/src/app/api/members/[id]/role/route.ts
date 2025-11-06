@@ -4,11 +4,12 @@ import { NextRequest, NextResponse } from "next/server";
 
 const BASE_API = process.env.NEXT_PUBLIC_API_BASE_URL!; 
 
-export async function PATCH(req: NextRequest, {params}: {params: {id: string}}){
+export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }>}){
+    const {id} = await context.params
     const body = await req.json();
     const raw = await getToken({req, raw: true})
 
-    const upstream = await fetch(`${BASE_API}/members/${params.id}/role`, {
+    const upstream = await fetch(`${BASE_API}/members/${id}/role`, {
         method: "PATCH",
         headers: {
             "Content-Type": "application/json",

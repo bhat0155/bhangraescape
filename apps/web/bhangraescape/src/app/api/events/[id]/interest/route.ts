@@ -3,11 +3,12 @@ import { getToken } from "next-auth/jwt";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
-export async function POST(req: NextRequest, {params}: {params: {id: string}}){
+export async function POST(req: NextRequest,  context: { params: Promise<{ id: string }>}){
+    const {id} = await context.params;
     const rawJWT = await getToken({req, raw: true})
     const body =await req.text()
 
-    const upstream = await fetch(`${API_BASE}/events/${params.id}/interest`,{
+    const upstream = await fetch(`${API_BASE}/events/${id}/interest`,{
          method: "POST",
           headers: {
             "content-type": "application/json",

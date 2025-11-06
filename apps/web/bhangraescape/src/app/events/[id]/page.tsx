@@ -8,11 +8,11 @@ import { cookies } from "next/headers";
 import InterestedToggle from "@/app/components/InterestedToggle";
 import Performers from "@/app/components/Performers";
 import type { MediaItem } from "@/app/types/media";
-import MediaGrid from "@/app/components/MediaGrid"; 
+
 import FinalMix from "@/app/components/FinalMix";
-import PerformersEditor from "@/app/components/PerformersEditor";
+
 import MediaManager from "@/app/components/MediaManager";
-import FinalMixEditor from "@/app/components/FinalMixEditor";
+
 import DeleteEvent from "@/app/components/DeleteEvent";
 
 export default async function EventDetailPage({

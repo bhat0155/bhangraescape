@@ -36,7 +36,11 @@ export default function AvailabilityPicker({
     if (disabled) return;
     setSelected((prev) => {
       const next = new Set(prev);
-      next.has(day) ? next.delete(day) : next.add(day);
+      if (next.has(day)) {
+            next.delete(day);
+          } else {
+            next.add(day);
+          }
       return next;
     });
   }

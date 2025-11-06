@@ -34,7 +34,7 @@ export default function AddMemberModal({onClose}: {onClose: () => void}){
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify(body)
             })
-            const created = res.json();
+            await res.json();
             router.refresh()
             onClose()
             

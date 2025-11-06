@@ -6,18 +6,6 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import { auth } from "./api/auth/[...nextauth]/route";
 
-
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
   title: "BhangraScape",
   description: "Bhangra event management platform",

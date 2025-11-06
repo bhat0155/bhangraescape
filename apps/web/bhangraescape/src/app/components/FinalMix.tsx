@@ -23,7 +23,7 @@ function providerFromUrl(url?: string | null): "SOUNDCLOUD" | "SPOTIFY" | "YOUTU
 
 export default function FinalMix({ title, url, role, eventId }: Props) {
   const provider = providerFromUrl(url);
-  const isAdmin = role === "ADMIN";
+
   return (
     <section>
       <header className="flex items-center justify-between">

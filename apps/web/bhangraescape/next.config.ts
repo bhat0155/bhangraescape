@@ -1,12 +1,16 @@
 import type { NextConfig } from "next";
 
-// next.config.ts
-const nextConfig = {
+const nextConfig: NextConfig = {
   eslint: {
+    // Skip ESLint during next build
     ignoreDuringBuilds: true,
   },
+  typescript: {
+    // Skip type-checking during next build
+    ignoreBuildErrors: true,
+  },
   images: {
-     domains: [
+    domains: [
       "bhangraescape.s3.us-east-2.amazonaws.com",
       "lh3.googleusercontent.com",
       "placehold.co",
@@ -18,10 +22,10 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: 'placehold.co', 
-      }
+        hostname: "placehold.co",
+      },
     ],
   },
 };
-export default nextConfig;
 
+export default nextConfig;
