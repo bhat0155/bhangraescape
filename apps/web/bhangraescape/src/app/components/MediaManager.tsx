@@ -94,6 +94,7 @@ export default function MediaManager({ eventId, role, initialMedia, token }: Pro
             prefix: "events",
             contentType,
             ext,
+             maxSizeMb: 100, 
         }
 
         // calling the s3 endpoint
