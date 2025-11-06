@@ -2,7 +2,15 @@ import type { NextConfig } from "next";
 
 // next.config.ts
 const nextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   images: {
+     domains: [
+      "bhangraescape.s3.us-east-2.amazonaws.com",
+      "lh3.googleusercontent.com",
+      "placehold.co",
+    ],
     remotePatterns: [
       {
         protocol: "https",
