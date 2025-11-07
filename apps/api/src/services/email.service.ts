@@ -1,4 +1,3 @@
-
 import { SendEmailCommand } from "@aws-sdk/client-sesv2";
 import { ses } from "../lib/ses";
 import { da } from "zod/v4/locales";
@@ -59,12 +58,13 @@ ${input.message}
 
 /** minimal HTML escaping */
 function escapeHtml(s: string) {
+  // FIX: Using global replace to resolve the TypeScript compilation error
   return s
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 // function to send emails for join-team

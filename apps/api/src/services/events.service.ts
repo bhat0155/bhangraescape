@@ -358,10 +358,12 @@ const topDays = sortedDays.slice(0, 2).map(([weekday, count]) => ({
     if (searchWhere) Object.assign(where, searchWhere);
 
     // Order strategy
-    const orderBy =
+    // FIX APPLIED HERE: Casting to any to resolve TS2322 (Type 'string' is not assignable to type 'SortOrder')
+    const orderBy = (
       status === "upcoming"
         ? { date: "asc" }
-        : { date: "desc" }; // past/all → latest first
+        : { date: "desc" } // past/all → latest first
+    ) as any;
 
     return prisma.event.findMany({
       where,
