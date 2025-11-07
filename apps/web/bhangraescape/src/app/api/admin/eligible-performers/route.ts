@@ -3,7 +3,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE = process.env.API_INTERNAL_BASE_URL!
 
 export async function GET(req: NextRequest){
     // read the jwt from this request

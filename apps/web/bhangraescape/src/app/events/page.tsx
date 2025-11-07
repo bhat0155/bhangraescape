@@ -32,7 +32,7 @@ export default async function EventsPage({
     const search =  sp?.search || null;
     const status = sp?.status || null;
 
-    const base = process.env.NEXT_PUBLIC_API_BASE_URL!;
+    const base = process.env.API_INTERNAL_BASE_URL!;
     // building the query params
     const queryParams = new URLSearchParams();
     if(search) queryParams.set("search", search);

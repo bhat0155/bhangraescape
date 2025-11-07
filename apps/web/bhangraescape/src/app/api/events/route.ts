@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL!; // e.g. http://localhost:4000/api
+const API_BASE = process.env.API_INTERNAL_BASE_URL!
 
 export async function POST(req: NextRequest) {
   console.log("➡️ [Proxy] POST /api/events hit");

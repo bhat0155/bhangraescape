@@ -7,7 +7,7 @@ export default function EventsCheckPage(){
     const [message, setMessage] = useState<string>("");
 
     useEffect(()=>{
-        const API_BASE  = process.env.NEXT_PUBLIC_API_BASE_URL;
+        const API_BASE  = process.env.API_INTERNAL_BASE_URL;
         if(!API_BASE){
             setStatus("error");
             setMessage("API base URL is not defined");

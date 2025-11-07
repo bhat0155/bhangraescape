@@ -22,7 +22,7 @@ export default async function EventDetailPage({
 }) {
   const { id: eventId } = await params;  
   console.log({eventId})
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL!
+  const base = process.env.API_INTERNAL_BASE_URL!
 
   // user info
   const session = await auth();
@@ -67,7 +67,7 @@ export default async function EventDetailPage({
   const event = data.event as EventDetail;
   
   // Fetching media for the event
-  const mediaRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/uploads/${eventId}/media`, {cache: "no-store"})
+  const mediaRes = await fetch(`${process.env.API_INTERNAL_BASE_URL}/uploads/${eventId}/media`, {cache: "no-store"})
   if(!mediaRes.ok){
     throw new Error(`Failed to fetch media ${mediaRes.status} ${mediaRes.statusText}`)
   }

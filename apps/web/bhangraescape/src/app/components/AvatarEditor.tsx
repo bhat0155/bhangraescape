@@ -75,7 +75,7 @@ export default function AvatarEditor({
       setUploadStep("PRESIGNING");
       const contentType = file.type;
       const ext = getExt(file.name)
-      const presignRes = await fetch(`/api/uploads/${memberId}/avatar/presign`, {
+      const presignRes = await fetch(`/api/uploads/members/${memberId}/avatar/presign`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json" 

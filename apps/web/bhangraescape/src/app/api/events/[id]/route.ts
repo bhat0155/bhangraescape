@@ -4,11 +4,10 @@ import { auth } from "@/app/api/auth/[...nextauth]/route";
 
 
 // helper to build express URL
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL!;
+const API_BASE = process.env.API_INTERNAL_BASE_URL!;
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
     const rawJWT = await getToken({ req, raw: true });
-    const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL!; // Ensure this is defined here or globally
 
     try {
         const upstream = await fetch(`${API_BASE}/events/${params.id}`, {

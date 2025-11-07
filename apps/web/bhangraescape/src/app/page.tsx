@@ -10,7 +10,7 @@ type EventListResponse = {
 };
 
 export default async function HomePage() {
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL!;
+  const base = process.env.API_INTERNAL_BASE_URL!;
   const url = `${base}/events`;
 
   let data: EventListResponse | null = null;

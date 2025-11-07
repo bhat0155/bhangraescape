@@ -98,7 +98,7 @@ export default function MediaManager({ eventId, role, initialMedia, token }: Pro
         }
 
         // calling the s3 endpoint
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/uploads/${eventId}/media/presign`,{
+        const res = await fetch(`/api/uploads/events/${eventId}/media/presign`,{
             method: "POST",
             headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
             body: JSON.stringify(payload)
@@ -170,7 +170,7 @@ export default function MediaManager({ eventId, role, initialMedia, token }: Pro
     title?: string|null,
     key: string
   }): Promise<MediaItem>{
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/uploads/${opts.eventId}/media`,{
+    const res = await fetch(`/api/uploads/events/${opts.eventId}/media`,{
         method: "POST",
         headers:  {
         "Content-Type": "application/json",
@@ -237,7 +237,7 @@ export default function MediaManager({ eventId, role, initialMedia, token }: Pro
   async function handleDeleteMedia(media: MediaItem){
     if(!isAdmin || !token) return;
     try{
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/uploads/media/${media.id}`, {
+        const res = await fetch(`/api/uploads/media/${media.id}`, {
             method: "DELETE",
             headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
