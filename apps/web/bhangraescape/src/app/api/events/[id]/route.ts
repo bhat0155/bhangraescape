@@ -6,26 +6,40 @@ import { auth } from "@/app/api/auth/[...nextauth]/route";
 // helper to build express URL
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
-export async function GET(req: NextRequest, {params}: {params: {id:string}}){
-    // 1. Read the nextAuth token from current request
-    // 2. raw: true gives signed jwt string
-    const rawJWT = await getToken({req, raw: true});
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+    const rawJWT = await getToken({ req, raw: true });
+    const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL!; // Ensure this is defined here or globally
 
-    // pass the request to express with authorisation
-    const upstream = await fetch(`${API_BASE}/events/${params.id}`, {
-        method: "GET",
-        headers: {
-      ...(rawJWT ? { Authorization: `Bearer ${rawJWT}` } : {}),
-        },
-        cache: "no-store"
-    })
+    try {
+        const upstream = await fetch(`${API_BASE}/events/${params.id}`, {
+            method: "GET",
+            headers: {
+                ...(rawJWT ? { Authorization: `Bearer ${rawJWT}` } : {}),
+            },
+            cache: "no-store"
+        });
 
-    // stream server's response back to frontend
-    const text = await upstream.text();
-    return new NextResponse(text, {
-        status: upstream.status,
-        headers: { "content-type": upstream.headers.get("content-type") ?? "application/json" },
-    })
+        const text = await upstream.text();
+
+        // 💡 CRITICAL DEBUG STEP: Log the 500 error content
+        if (!upstream.ok) {
+            console.error(
+                `[API Proxy Error] GET /events/${params.id} failed with status ${upstream.status}`,
+                `Response body: ${text.substring(0, 500)}` // Log up to 500 chars of the body
+            );
+        }
+
+        // Stream server's response back to frontend
+        return new NextResponse(text, {
+            status: upstream.status,
+            headers: { "content-type": upstream.headers.get("content-type") ?? "application/json" },
+        });
+
+    } catch (error) {
+        // This catches network errors (e.g., API is completely down/unreachable)
+        console.error("[Proxy Network Error] Could not connect to upstream API:", error);
+        return NextResponse.json({ error: "Upstream API connection failed" }, { status: 502 });
+    }
 }
 
 export async function POST(req: NextRequest){
