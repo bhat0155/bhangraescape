@@ -34,20 +34,36 @@ export default async function EventDetailPage({
     cookies().get("authjs.session-token")?.value ??
     null;
 
-    const res = await fetch(`${base}/events/${eventId}`,{
-      cache: "no-store",
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    // 🛑 START OF MODIFIED BLOCK 🛑
+    let data: any = null;
 
-    })
-  
-  if (res.status === 404) {
-    notFound();
-  }
-  if (!res.ok) {
-    throw new Error(`Failed to fetch event details: ${res.status} ${res.statusText}`);
-  }
+    try {
+        const res = await fetch(`${base}/events/${eventId}`,{
+            cache: "no-store",
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
 
-  const data = await res.json();
+        const text = await res.text(); // Read as text first for inspection
+
+        if (res.status === 404) {
+            notFound();
+        }
+        
+        if (!res.ok) {
+            // Log the raw response body on failure
+            console.error(`[CRITICAL FETCH ERROR] Status: ${res.status}. Body: ${text}`);
+            throw new Error(`Failed to fetch event details: ${res.status} ${res.statusText}`);
+        }
+        
+        data = JSON.parse(text); // Parse only if successful
+
+    } catch(err) {
+        // This catches both network errors and the explicit throw new Error(...) above
+        console.error(`[PAGE COMPONENT ERROR] Failed to process event ${eventId}:`, err);
+        throw err; // Re-throw the error to trigger Next.js error page
+    }
+    // 🛑 END OF MODIFIED BLOCK 🛑
+
   const event = data.event as EventDetail;
   
   // Fetching media for the event
