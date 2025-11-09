@@ -7,10 +7,10 @@ type Params = { mediaId: string };
 
 export async function DELETE(
   req: NextRequest,
-  context: { params: Params }
+  context: { params: Promise<Params> }
 ) {
-  const { mediaId } = context.params;
-  const rawJWT = await getToken({ req, raw: true });
+  const { mediaId } = await context.params;
+  const rawJWT = await getToken({ req, raw: true, secret: process.env.NEXTAUTH_SECRET, trustHost: true });
 
   const upstream = await fetch(`${API_BASE}/uploads/media/${mediaId}`, {
     method: "DELETE",

@@ -7,10 +7,10 @@ type Params = { eventId: string };
 
 export async function POST(
   req: NextRequest,
-  context: { params: Params }
+  context: { params: Promise<Params> }
 ) {
-  const { eventId } = context.params;
-  const rawJWT = await getToken({ req, raw: true });
+  const { eventId } = await context.params;
+  const rawJWT = await getToken({ req, raw: true, secret: process.env.NEXTAUTH_SECRET, trustHost: true });
   const body = await req.text();
 
   const upstream = await fetch(`${API_BASE}/uploads/${eventId}/media/presign`, {

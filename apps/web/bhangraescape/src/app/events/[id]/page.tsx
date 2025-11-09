@@ -29,9 +29,10 @@ export default async function EventDetailPage({
   const role = (session?.user as any)?.role ?? "GUEST";
   const isAdmin = role === "ADMIN"
   // read jwt from cookies and then pass it to express
+  const cookieStore = await cookies();
   const token =
-    cookies().get("__Secure-authjs.session-token")?.value ??
-    cookies().get("authjs.session-token")?.value ??
+    cookieStore.get("authjs.session-token")?.value ??
+    cookieStore.get("__Secure-authjs.session-token")?.value ??
     null;
 
     // 🛑 START OF MODIFIED BLOCK 🛑

@@ -250,10 +250,7 @@ export default function MediaManager({ eventId, role, initialMedia, token }: Pro
         if(res.ok){
             setMedia((prev)=> prev.filter((item)=> item.id != media.id))
         }
-        console.log(` Media ${media.title} deleted successfully.`);
-
     }catch(err){
-        console.log(err)
         throw new Error(`Failed to delete media: ${err}`)
     }
   }
