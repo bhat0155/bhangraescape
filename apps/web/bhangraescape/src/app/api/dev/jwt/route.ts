@@ -26,10 +26,15 @@
 // ==========================================================================================================================================================================================================================================
 
 // apps/web/bhangraescape/app/api/dev/jwt/route.ts
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
+
+    const nextSecret  = !!process.env.NEXTAUTH_SECRET;
+  console.log(`🔑 NEXTAUTH_SECRET is defined: ${nextSecret}`);
+
+    console.log(`request url is ${req.url}`)
     // 1. Convert Headers to a plain object
     const headersObject: Record<string, string> = {};
     for (const [key, value] of req.headers.entries()) {
