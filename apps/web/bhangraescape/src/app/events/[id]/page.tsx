@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import AvailabilityPicker from "@/app/components/AvailabilityPicker";
 import { auth } from "@/app/api/auth/[...nextauth]/route";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import InterestedToggle from "@/app/components/InterestedToggle";
 import Performers from "@/app/components/Performers";
 import type { MediaItem } from "@/app/types/media";
@@ -22,21 +22,12 @@ export default async function EventDetailPage({
 }) {
   const { id: eventId } = await params;  
   console.log({eventId})
-  const headerList = headers();
-  const proto = headerList.get("x-forwarded-proto");
-  const host =
-    headerList.get("x-forwarded-host") ?? headerList.get("host");
-  const envFallback =
-    process.env.NEXTAUTH_URL ??
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    (process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : null) ??
-    "http://localhost:3000";
-  const origin =
-    proto && host
-      ? `${proto}://${host}`
-      : envFallback.replace(/\/$/, "");
+  const apiBase =
+    process.env.API_INTERNAL_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (!apiBase) {
+    throw new Error("API_INTERNAL_BASE_URL (or NEXT_PUBLIC_API_BASE_URL) is not set");
+  }
+  const base = apiBase.replace(/\/$/, "");
 
   // user info
   const session = await auth();
@@ -48,23 +39,16 @@ export default async function EventDetailPage({
     cookieStore.get("authjs.session-token")?.value ??
     cookieStore.get("__Secure-authjs.session-token")?.value ??
     null;
-  const cookieHeader = cookieStore
-    .getAll()
-    .map(({ name, value }) => `${name}=${value}`)
-    .join("; ");
-  const fetchFromApp = async (path: string) => {
-    const res = await fetch(`${origin}${path}`, {
-      cache: "no-store",
-      headers: cookieHeader ? { cookie: cookieHeader } : undefined,
-    });
-    return res;
-  };
+  const authHeader = token ? { Authorization: `Bearer ${token}` } : undefined;
 
     // 🛑 START OF MODIFIED BLOCK 🛑
     let data: any = null;
 
     try {
-        const res = await fetchFromApp(`/api/events/${eventId}`);
+        const res = await fetch(`${base}/events/${eventId}`, {
+            cache: "no-store",
+            headers: authHeader,
+        });
 
         const text = await res.text(); // Read as text first for inspection
 
@@ -90,7 +74,10 @@ export default async function EventDetailPage({
   const event = data.event as EventDetail;
   
   // Fetching media for the event
-  const mediaRes = await fetchFromApp(`/api/uploads/events/${eventId}/media`);
+  const mediaRes = await fetch(`${base}/uploads/${eventId}/media`, {
+    cache: "no-store",
+    headers: authHeader,
+  });
   if(!mediaRes.ok){
     throw new Error(`Failed to fetch media ${mediaRes.status} ${mediaRes.statusText}`)
   }
