@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getRawAuthToken } from "@/lib/auth";
 
 const API_BASE = process.env.API_INTERNAL_BASE_URL!
 
 export async function POST(req: NextRequest) {
   console.log("➡️ [Proxy] POST /api/events hit");
 
-  const rawJWT = await getToken({ req, raw: true });
+  const rawJWT = await getRawAuthToken(req);
   const body = await req.json();
 
   const upstream = await fetch(`${API_BASE}/events`, {
@@ -26,5 +26,4 @@ export async function POST(req: NextRequest) {
     },
   });
 }
-
 

@@ -27,7 +27,7 @@
 
 // apps/web/bhangraescape/app/api/dev/jwt/route.ts
 import { NextResponse, NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getRawAuthToken, isSecureRequest } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
 
@@ -42,20 +42,17 @@ export async function GET(req: NextRequest) {
     }
     
     // 2. Attempt to retrieve the token (still necessary for full context)
-    const token = await getToken({ 
-        req, 
-        secret: process.env.NEXTAUTH_SECRET, 
-        raw: true 
-    });
+    const token = await getRawAuthToken(req);
+    const secureCookie = isSecureRequest(req);
 
     // 3. Return the headers and the token result directly in the response
     return NextResponse.json({ 
         status: token ? "SUCCESS: Token Found" : "FAILURE: Token is null",
         token: token,
+        secureCookie,
         // Crucially, show all headers received by the function
         receivedHeaders: headersObject 
     });
 }
-
 
 

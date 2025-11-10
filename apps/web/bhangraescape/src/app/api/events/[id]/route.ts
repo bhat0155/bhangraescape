@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse} from "next/server";
-import { getToken } from "next-auth/jwt";
 import { auth } from "@/app/api/auth/[...nextauth]/route"; 
+import { getRawAuthToken } from "@/lib/auth";
 
 
 // helper to build express URL
 const API_BASE = process.env.API_INTERNAL_BASE_URL!;
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-    const rawJWT = await getToken({ req, raw: true });
+    const rawJWT = await getRawAuthToken(req);
 
     try {
         const upstream = await fetch(`${API_BASE}/events/${params.id}`, {
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest){
 }
 
 export async function PATCH(req: NextRequest, {params}: {params: {id: string}}){
-  const rawJWT = await getToken({ req, raw: true });
+  const rawJWT = await getRawAuthToken(req);
   const body = await req.json();
 
   const upstream = await fetch(`${API_BASE}/events/${params.id}`, {
@@ -98,7 +98,7 @@ export async function PATCH(req: NextRequest, {params}: {params: {id: string}}){
 
 export async function DELETE(req: NextRequest, context: { params: Promise<{ id: string }>}){
   const {id} = await context.params;
-  const rawJWT = await getToken({ req, raw: true });
+  const rawJWT = await getRawAuthToken(req);
 
   const upstream = await fetch(`${API_BASE}/events/${id}`, {
     method: "DELETE",
@@ -115,4 +115,3 @@ export async function DELETE(req: NextRequest, context: { params: Promise<{ id: 
 
   return NextResponse.json({status: "deleted"}, {status: 200})
 }
-

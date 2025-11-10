@@ -1,5 +1,5 @@
-import { getToken } from "next-auth/jwt";
 import { NextResponse, NextRequest } from "next/server";
+import { getRawAuthToken } from "@/lib/auth";
 
 const API_BASE = process.env.API_INTERNAL_BASE_URL!;
 
@@ -10,7 +10,7 @@ export async function POST(
   context: { params: Params }
 ) {
   const { memberId } = context.params;
-  const token = await getToken({ req, raw: true });
+  const token = await getRawAuthToken(req);
   const payload = await req.json();
 
   const upstream = await fetch(`${API_BASE}/uploads/presign`, {

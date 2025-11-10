@@ -1,12 +1,12 @@
 import { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getRawAuthToken } from "@/lib/auth";
 
 const API_BASE = process.env.API_INTERNAL_BASE_URL;
 
 
 export async function GET(req: NextRequest, context: { params: Promise<{ id: string }>}){
     const id = await context.params
-    const rawJWT = await getToken({req, raw: true});
+    const rawJWT = await getRawAuthToken(req);
 
     const upstream = await fetch(`${API_BASE}/events/${id}/performers`, {
         method: "GET",
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
 export async function PUT(req: NextRequest, {params}: {params: {id: string}}){
     // body is {[userId1, userId2]}
     const body = await req.text();
-    const rawJWT = await getToken({req, raw: true});
+    const rawJWT = await getRawAuthToken(req);
 
     const upstream = await fetch(`${API_BASE}/events/${params.id}/performers`,{
         method: "PUT",

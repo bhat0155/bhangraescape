@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getRawAuthToken } from "@/lib/auth";
 
 const API_BASE = process.env.API_INTERNAL_BASE_URL!;
 
@@ -10,7 +10,7 @@ export async function DELETE(
   context: { params: Promise<Params> }
 ) {
   const { mediaId } = await context.params;
-  const rawJWT = await getToken({ req, raw: true, secret: process.env.NEXTAUTH_SECRET, trustHost: true });
+  const rawJWT = await getRawAuthToken(req);
 
   const upstream = await fetch(`${API_BASE}/uploads/media/${mediaId}`, {
     method: "DELETE",

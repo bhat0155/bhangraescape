@@ -1,10 +1,10 @@
 // apps/web/bhangraescape/src/app/api/dev/roundtrip/route.ts
 import { NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getRawAuthToken } from "@/lib/auth";
 
 export async function GET(req: Request) {
   // 1) Extract JWT from the Auth.js cookie
-  const token = await getToken({ req, raw: true });
+  const token = await getRawAuthToken(req);
   if (!token) {
     return NextResponse.json({ error: "Not signed in" }, { status: 401 });
   }

@@ -1,11 +1,11 @@
-import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
+import { getRawAuthToken } from "@/lib/auth";
 
 const BASE_API = process.env.API_INTERNAL_BASE_URL!
 
 export async function POST(req: NextRequest){
     const body = await req.json();
-    const token = await getToken({req, raw: true});
+    const token = await getRawAuthToken(req);
 
     const upstream = await fetch(`${BASE_API}/contactus`, {
         method: "POST",

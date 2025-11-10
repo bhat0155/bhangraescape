@@ -1,13 +1,12 @@
-
-import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
+import { getRawAuthToken } from "@/lib/auth";
 
 const BASE_API = process.env.API_INTERNAL_BASE_URL!
 
 export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }>}){
     const {id} = await context.params
     const body = await req.json();
-    const raw = await getToken({req, raw: true})
+    const raw = await getRawAuthToken(req)
 
     const upstream = await fetch(`${BASE_API}/members/${id}/role`, {
         method: "PATCH",

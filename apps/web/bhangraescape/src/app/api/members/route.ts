@@ -1,5 +1,5 @@
-import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
+import { getRawAuthToken } from "@/lib/auth";
 
 const API_BASE = process.env.API_INTERNAL_BASE_URL!
 
@@ -21,7 +21,7 @@ export async function GET(){
 // post
 
 export async function POST(req: NextRequest){
-    const token = await getToken({req, raw: true});
+    const token = await getRawAuthToken(req);
     const body = await req.json();
 
     const upstream = await fetch(`${API_BASE}/members`, {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getRawAuthToken } from "@/lib/auth";
 
 const API_BASE = process.env.API_INTERNAL_BASE_URL!;
 
@@ -7,7 +7,7 @@ const API_BASE = process.env.API_INTERNAL_BASE_URL!;
 export async function POST(req: NextRequest,  context: { params: Promise<{ id: string }> }){
   const {id} = await context.params
     // read the jwt from browser
-    const rawJWT = await getToken({req, raw: true});
+    const rawJWT = await getRawAuthToken(req);
     const payload = await req.json();
 
     // forward the request to express

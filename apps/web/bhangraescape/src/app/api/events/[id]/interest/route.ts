@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getRawAuthToken } from "@/lib/auth";
 
 const API_BASE = process.env.API_INTERNAL_BASE_URL!;
 
 export async function POST(req: NextRequest,  context: { params: Promise<{ id: string }>}){
     const {id} = await context.params;
-    const rawJWT = await getToken({req, raw: true})
+    const rawJWT = await getRawAuthToken(req)
     const body =await req.text()
 
     const upstream = await fetch(`${API_BASE}/events/${id}/interest`,{

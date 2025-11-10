@@ -1,13 +1,13 @@
 // get all the eligible performers from backend server
 
 import { NextResponse, NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getRawAuthToken } from "@/lib/auth";
 
 const API_BASE = process.env.API_INTERNAL_BASE_URL!
 
 export async function GET(req: NextRequest){
     // read the jwt from this request
-    const rawJWT = await getToken({req, raw: true});
+    const rawJWT = await getRawAuthToken(req);
 
     const upstream = await fetch(`${API_BASE}/admin/eligible-performers`, {
         method: "GET",
