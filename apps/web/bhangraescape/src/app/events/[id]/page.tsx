@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import AvailabilityPicker from "@/app/components/AvailabilityPicker";
 import { auth } from "@/app/api/auth/[...nextauth]/route";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import InterestedToggle from "@/app/components/InterestedToggle";
 import Performers from "@/app/components/Performers";
 import type { MediaItem } from "@/app/types/media";
@@ -22,27 +22,49 @@ export default async function EventDetailPage({
 }) {
   const { id: eventId } = await params;  
   console.log({eventId})
-  const base = process.env.API_INTERNAL_BASE_URL!
+  const headerList = headers();
+  const proto = headerList.get("x-forwarded-proto");
+  const host =
+    headerList.get("x-forwarded-host") ?? headerList.get("host");
+  const envFallback =
+    process.env.NEXTAUTH_URL ??
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    (process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : null) ??
+    "http://localhost:3000";
+  const origin =
+    proto && host
+      ? `${proto}://${host}`
+      : envFallback.replace(/\/$/, "");
 
   // user info
   const session = await auth();
   const role = (session?.user as any)?.role ?? "GUEST";
   const isAdmin = role === "ADMIN"
   // read jwt from cookies and then pass it to express
-  const cookieStore = await cookies();
+  const cookieStore = cookies();
   const token =
     cookieStore.get("authjs.session-token")?.value ??
     cookieStore.get("__Secure-authjs.session-token")?.value ??
     null;
+  const cookieHeader = cookieStore
+    .getAll()
+    .map(({ name, value }) => `${name}=${value}`)
+    .join("; ");
+  const fetchFromApp = async (path: string) => {
+    const res = await fetch(`${origin}${path}`, {
+      cache: "no-store",
+      headers: cookieHeader ? { cookie: cookieHeader } : undefined,
+    });
+    return res;
+  };
 
     // 🛑 START OF MODIFIED BLOCK 🛑
     let data: any = null;
 
     try {
-        const res = await fetch(`${base}/events/${eventId}`,{
-            cache: "no-store",
-            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-        });
+        const res = await fetchFromApp(`/api/events/${eventId}`);
 
         const text = await res.text(); // Read as text first for inspection
 
@@ -68,7 +90,7 @@ export default async function EventDetailPage({
   const event = data.event as EventDetail;
   
   // Fetching media for the event
-  const mediaRes = await fetch(`${process.env.API_INTERNAL_BASE_URL}/uploads/${eventId}/media`, {cache: "no-store"})
+  const mediaRes = await fetchFromApp(`/api/uploads/events/${eventId}/media`);
   if(!mediaRes.ok){
     throw new Error(`Failed to fetch media ${mediaRes.status} ${mediaRes.statusText}`)
   }
