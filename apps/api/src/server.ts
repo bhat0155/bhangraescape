@@ -20,6 +20,9 @@ const devOrigin = process.env.NEXT_DEV_ORIGIN ?? 'http://localhost:3000';
 // loads env
 dotenv.config();
 const app = express();
+// Behind Render/Vercel proxies we must trust the forwarded headers so rate limiting
+// and IP lookups work correctly.
+app.set('trust proxy', process.env.NODE_ENV === 'production' ? 1 : 0);
 app.use(helmet({
     crossOriginResourcePolicy: {policy: "cross-origin"}
 }));  // security headers

@@ -7,6 +7,40 @@ function getBearer(req: Request): string | null {
   return h.startsWith("Bearer ") ? h.slice(7) : null;
 }
 
+const DEFAULT_COOKIE_NAME = "authjs.session-token";
+const SECURE_COOKIE_NAME = "__Secure-authjs.session-token";
+
+const configuredCookieName =
+  process.env.AUTH_SESSION_COOKIE ??
+  (process.env.NODE_ENV === "production" ? SECURE_COOKIE_NAME : DEFAULT_COOKIE_NAME);
+
+async function decodeAuthToken(token: string) {
+  const secret = process.env.NEXTAUTH_SECRET;
+  if (!secret) {
+    throw new Error("NEXTAUTH_SECRET is not defined on the API service");
+  }
+
+  const salts = Array.from(
+    new Set([configuredCookieName, DEFAULT_COOKIE_NAME, SECURE_COOKIE_NAME]),
+  );
+
+  for (const salt of salts) {
+    try {
+      const payload = await decode({ token, secret, salt });
+      if (payload) {
+        return payload;
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "";
+      if (!message.includes("no matching decryption secret")) {
+        throw err;
+      }
+    }
+  }
+
+  return null;
+}
+
 export async function authSession(req: Request, _res: Response, next: NextFunction) {
   try {
     const token = getBearer(req);
@@ -15,13 +49,7 @@ export async function authSession(req: Request, _res: Response, next: NextFuncti
       return next();
     }
 
-    const payload = await decode({
-      token,
-      // MUST be exactly the same as in your Next.js app
-      secret: process.env.NEXTAUTH_SECRET!,
-      salt: "authjs.session-token",           // default Auth.js salt
-
-    });
+    const payload = await decodeAuthToken(token);
 
     if (!payload) {
       (req as any).user = null;
