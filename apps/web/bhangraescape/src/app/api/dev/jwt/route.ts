@@ -22,6 +22,9 @@
 //   return NextResponse.json({ token });
 // }
 
+
+// ==========================================================================================================================================================================================================================================
+
 // apps/web/bhangraescape/app/api/dev/jwt/route.ts
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
@@ -48,3 +51,6 @@ export async function GET(req: Request) {
         receivedHeaders: headersObject 
     });
 }
+
+
+

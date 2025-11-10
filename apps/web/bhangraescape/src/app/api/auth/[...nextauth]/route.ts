@@ -4,6 +4,8 @@ import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "../../../../../lib/prisma";
 
+const isSecureEnvironment = process.env.NODE_ENV === "production" || process.env.VERCEL === '1';
+const cookiePrefix = isSecureEnvironment ? '__Secure-' : '';
 
 export const { handlers: { GET, POST }, auth } = NextAuth({
   trustHost: true,
@@ -14,6 +16,17 @@ export const { handlers: { GET, POST }, auth } = NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
+  cookies: {
+      sessionToken: {
+          name: `${cookiePrefix}authjs.session-token`,
+          options: {
+            httpOnly: true,
+            sameSite: "lax",
+            path: '/',
+            secure: isSecureEnvironment,
+          }
+      }
+  },
   session: { strategy: "jwt" },
  callbacks: {
   async jwt({ token, user }) {
