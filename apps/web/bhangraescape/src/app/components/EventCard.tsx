@@ -9,7 +9,7 @@ type EventCardProps = {
 
 export default function EventCard({event, metaText}: EventCardProps) {
     return(
-         <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300 border border-b-2">
+         <div className="card bg-indigo-50 shadow-xl hover:shadow-2xl transition-shadow duration-300 border border-b-2">
                                 <div className="card-body p-4">
                                     
                                     <h3 className="card-title text-xl font-bold leading-tight break-words">

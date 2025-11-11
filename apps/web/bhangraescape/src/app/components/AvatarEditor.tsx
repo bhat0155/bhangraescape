@@ -207,13 +207,12 @@ export default function AvatarEditor({
 
       {/* Buttons */}
   
-      <div className="flex items-center gap-6">
-
+<div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 w-full">
         {/* upload */}
         <button
         type="button"
         onClick={handleUploadAndPatch}
-        className="btn btn-primary btn-sm"
+className="btn btn-primary btn-sm border-2 border-black w-full sm:w-auto px-2"
         disabled={!file || uploadStep !=="READY" || saving}
         title="Upload image and save avatar"
         >
@@ -228,7 +227,7 @@ export default function AvatarEditor({
         {/* save */}
         <button
           type="button"
-          className="btn btn-primary btn-sm"
+className="btn btn-primary btn-sm border-2 border-black w-full sm:w-auto px-2"
           onClick={handleSave}
           disabled={saving}
           title="Save"
@@ -239,7 +238,7 @@ export default function AvatarEditor({
         {/* cancel */}
         <button
           type="button"
-          className="btn btn-ghost btn-sm"
+className="btn btn-primary btn-sm border-2 border-black w-full sm:w-auto px-2"
           onClick={onClose}
           disabled={saving}
           title="Cancel"

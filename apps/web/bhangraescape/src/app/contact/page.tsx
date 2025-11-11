@@ -7,8 +7,7 @@ export const metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[40%_60%] min-h-[70vh] gap-0 px-4 md:px-12 py-8">
-      {/* LEFT: Image with text on top */}
+<div className="grid grid-cols-1 md:grid-cols-[40%_60%] min-h-[70vh] gap-8 md:gap-0 px-4 md:px-12 py-8">   
       <section className="relative h-[70vh] rounded-xl overflow-hidden">
         <Image
           src="/images/contact.jpeg"

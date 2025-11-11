@@ -100,7 +100,7 @@ export default async function EventDetailPage({
       </div>
 
       {/* Event header */}
-      <div  className="border border-black-300 rounded-xl p-6 shadow-sm text-center space-y-3 bg-base-100">
+      <div  className="border-2 border-indigo-400 rounded-xl p-6 shadow-sm text-center space-y-3 bg-indigo-50">
         <h1 className="text-4xl font-extrabold text-primary">{event.title}</h1>
         <p className="text-sm opacity-70">
           <span className="font-medium">Date:</span> {formatDate(event.date)}

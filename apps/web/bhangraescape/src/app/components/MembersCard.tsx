@@ -11,7 +11,7 @@ export default function MemberCard({member}: {member: Member}){
 
      return (
     <li className="card bg-base-100 shadow hover:shadow-md transition">
-      <Link href={`/members/${member.id}`} className="card-body items-center text-center gap-3">
+      <Link href={`/members/${member.id}`} className="card-body items-center text-center gap-3 bg-indigo-50">
         <figure className="mt-2">
           {hasAvatar ? (
             <Image
