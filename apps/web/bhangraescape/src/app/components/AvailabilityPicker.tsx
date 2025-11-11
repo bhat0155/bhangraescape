@@ -29,8 +29,13 @@ export default function AvailabilityPicker({
   const [topDays, setTopDays] = useState(initialTopDays);
   const [saving, setSaving] = useState(false);
 
-  const disabled = role === "GUEST" || !canSet || saving;
   const isGuest = role === "GUEST";
+  const disabled = isGuest || !canSet || saving;
+  const lockReason = isGuest
+    ? "Only members can choose availability."
+    : !canSet
+      ? "Can't modify past dated events."
+      : null;
 
   function toggle(day: Weekday) {
     if (disabled) return;
@@ -95,13 +100,13 @@ export default function AvailabilityPicker({
 
   return (
     <div className="space-y-3 relative group">
-      {isGuest && (
+      {lockReason && (
         <div className="absolute inset-0 z-10 flex items-center justify-center cursor-not-allowed transition-opacity duration-300 pointer-events-none">
           <div className="flex items-center text-base font-bold text-gray-800 p-4 bg-white/95 rounded-xl shadow-2xl border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-auto">
             <span className="mr-3 text-xl" role="img" aria-label="No entry">
               🚫
             </span>
-            <span>Only members can choose availability.</span>
+            <span>{lockReason}</span>
           </div>
         </div>
       )}
