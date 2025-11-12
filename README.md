@@ -23,7 +23,7 @@ npm install
 
 ## ⚙️ Configuration
 Create a `.env` (or `.env.local`) file before running the app and populate it with the values that connect the backend, frontend, and database.
-GOOGLE_CLIENT_ID=
+```GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 
 DATABASE_URL=
@@ -47,7 +47,7 @@ SES_FROM=
 ADMIN_NOTIFY=
 
 NEXT_DEV_ORIGIN=
-NEXTAUTH_COOKIE_DOMAIN=
+NEXTAUTH_COOKIE_DOMAIN=```
 
 ## 💾 Database Setup
 Ensure PostgreSQL is running and the credentials above are valid, then run:
