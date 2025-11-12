@@ -31,7 +31,7 @@ Create a `.env` (or `.env.local`) file before running the app and populate it wi
 | `PG_DATABASE` | Target database name |
 | `PG_PASSWORD` | Password for the database user |
 | `PG_PORT` | PostgreSQL port (default `5432`) |
-| `EXPRESS_PORT` | Port for the Express server (e.g., `5000`) |
+| `EXPRESS_PORT` | Port for the Express server (e.g., `4000`) |
 | `NEXT_PUBLIC_API_URL` | Base URL the Next.js app uses to reach the API |
 | `JWT_SECRET` | Secret key for signing authentication tokens |
 
@@ -55,7 +55,7 @@ Start each service in separate terminals:
   npm run dev
   ```
 
-Access the frontend at `http://localhost:3000` and the API at `http://localhost:5000` (or the ports configured in your `.env`).
+Access the frontend at `http://localhost:3000` and the API at `http://localhost:4000` (or the ports configured in your `.env`).
 
 ## 📝 Key API Endpoints
 | Method | Endpoint | Description |
