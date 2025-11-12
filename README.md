@@ -24,16 +24,38 @@ npm install
 ## ⚙️ Configuration
 Create a `.env` (or `.env.local`) file before running the app and populate it with the values that connect the backend, frontend, and database.
 
-| Variable | Description |
-| --- | --- |
-| `PG_USER` | PostgreSQL user |
-| `PG_HOST` | PostgreSQL host (e.g., `localhost`) |
-| `PG_DATABASE` | Target database name |
-| `PG_PASSWORD` | Password for the database user |
-| `PG_PORT` | PostgreSQL port (default `5432`) |
-| `EXPRESS_PORT` | Port for the Express server (e.g., `4000`) |
-| `NEXT_PUBLIC_API_URL` | Base URL the Next.js app uses to reach the API |
-| `JWT_SECRET` | Secret key for signing authentication tokens |
+### Backend
+DATABASE_URL
+NEXT_DEV_ORIGIN
+NEXTAUTH_SECRET
+AUTH_SECRET
+NEXTAUTH_COOKIE_DOMAIN
+NEXTAUTH_URL
+AUTH_TRUST_HOST
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+AWS_REGION
+S3_BUCKET_NAME
+SES_FROM
+ADMIN_NOTIFY
+NEXT_PUBLIC_API_BASE_URL
+API_INTERNAL_BASE_URL
+
+### Frontend
+GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET
+
+DATABASE_URL
+
+NEXTAUTH_SECRET
+AUTH_SECRET
+NEXTAUTH_URL
+AUTH_URL
+AUTH_TRUST_HOST
+
+NEXT_PUBLIC_SITE_URL
+NEXT_PUBLIC_API_BASE_URL
+API_INTERNAL_BASE_URL
 
 ## 💾 Database Setup
 Ensure PostgreSQL is running and the credentials above are valid, then run:
@@ -48,7 +70,7 @@ Start each service in separate terminals:
 
 - **Backend (Express):**
   ```bash
-  npm run dev:server
+  npm run dev
   ```
 - **Frontend (Next.js):**
   ```bash
