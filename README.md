@@ -23,39 +23,67 @@ npm install
 
 ## ⚙️ Configuration
 Create a `.env` (or `.env.local`) file before running the app and populate it with the values that connect the backend, frontend, and database.
+##############################
+# 🔵 GOOGLE OAUTH (Frontend)
+##############################
 
-### Backend
-DATABASE_URL
-NEXT_DEV_ORIGIN
-NEXTAUTH_SECRET
-AUTH_SECRET
-NEXTAUTH_COOKIE_DOMAIN
-NEXTAUTH_URL
-AUTH_TRUST_HOST
-AWS_ACCESS_KEY_ID
-AWS_SECRET_ACCESS_KEY
-AWS_REGION
-S3_BUCKET_NAME
-SES_FROM
-ADMIN_NOTIFY
-NEXT_PUBLIC_API_BASE_URL
-API_INTERNAL_BASE_URL
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
 
-### Frontend
-GOOGLE_CLIENT_ID
-GOOGLE_CLIENT_SECRET
 
-DATABASE_URL
+##############################
+# 🟣 DATABASE (Local / Cloud)
+##############################
 
-NEXTAUTH_SECRET
-AUTH_SECRET
-NEXTAUTH_URL
-AUTH_URL
-AUTH_TRUST_HOST
+DATABASE_URL="postgresql://username:password@host:5432/database?schema=public"
 
-NEXT_PUBLIC_SITE_URL
-NEXT_PUBLIC_API_BASE_URL
-API_INTERNAL_BASE_URL
+
+##############################
+# 🔐 AUTH / NEXTAUTH
+##############################
+
+NEXTAUTH_SECRET=your_nextauth_secret
+AUTH_SECRET=your_auth_secret
+
+NEXTAUTH_URL=http://localhost:3000
+AUTH_URL=http://localhost:3000
+AUTH_TRUST_HOST=true
+
+
+##############################
+# 🌐 PUBLIC SITE CONFIG
+##############################
+
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_API_BASE_URL=http://localhost:4000/api
+
+
+##############################
+# 🟠 INTERNAL API ROUTING
+##############################
+
+API_INTERNAL_BASE_URL=http://localhost:4000/api
+
+
+##############################
+# 🟡 AWS (S3 / SES)
+##############################
+
+AWS_ACCESS_KEY_ID=your_aws_access_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+AWS_REGION=your_aws_region
+S3_BUCKET_NAME=your_bucket_name
+
+SES_FROM=your_verified_ses_email
+ADMIN_NOTIFY=your_admin_email
+
+
+##############################
+# 🧪 DEV ONLY
+##############################
+
+NEXT_DEV_ORIGIN=http://localhost:3000
+NEXTAUTH_COOKIE_DOMAIN=localhost
 
 ## 💾 Database Setup
 Ensure PostgreSQL is running and the credentials above are valid, then run:
