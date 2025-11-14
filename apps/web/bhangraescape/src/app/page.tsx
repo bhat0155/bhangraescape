@@ -175,12 +175,12 @@ export default async function HomePage() {
 
   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <div>
-      <p className="font-medium"> 2140 Baseline Road, 522 apartment, Ottawa, K2C 3V9</p>
+      <p className="font-medium">📍 Algonquin College, 1385 Woodroffe Ave, Ottawa, ON K2G 1V8</p>
     </div>
 
     <a
       href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
-        "2140 Baseline Road , 522 apartment, Ottawa, K2C 3V9"
+        "Algonquin College, 1385 Woodroffe Ave, Ottawa, ON K2G 1V8"
       )}`}
       target="_blank"
       rel="noopener noreferrer"
@@ -195,7 +195,7 @@ export default async function HomePage() {
     <iframe
       title="Map to our location"
       src={`https://www.google.com/maps?q=${encodeURIComponent(
-        "2140 Baseline Road , 522 apartment, Ottawa, K2C 3V9"
+        "Algonquin College, 1385 Woodroffe Ave, Ottawa, ON K2G 1V8"
       )}&output=embed`}
       loading="lazy"
       referrerPolicy="no-referrer-when-downgrade"
