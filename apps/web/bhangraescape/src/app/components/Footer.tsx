@@ -1,3 +1,5 @@
+
+
 export default function Footer(){
     return (
         <div>
@@ -5,7 +7,7 @@ export default function Footer(){
                       <div className="container mx-auto w-full max-w-6xl p-4 md:p-6 text-sm flex flex-col md:flex-row items-center justify-between gap-2">
                         <p>{new Date().getFullYear()} BhangraScape</p>
                         <p className="opacity 70">
-                            Made with ❤️ by Ekam
+                           <a href="https://ekamsingh.ca" target="_blank"> Made with ❤️ by Ekam</a>
                         </p>
                       </div>
 

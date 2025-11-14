@@ -63,7 +63,7 @@ export default async function HomePage() {
       </p>
       <div className="pt-2 text-white">
         <Link href="/contact" className="btn btn-primary">
-          Join Our Team
+         Get In Touch
         </Link>
       </div>
     </div>
