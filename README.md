@@ -81,4 +81,4 @@ Access the frontend at `http://localhost:3000` and the API at `http://localhost:
 
 ## 📄 License & Contact
 - **License:** MIT License  
-- **Contact:** bhat0155@algonquinlive.com
+- **Contact:** ekamsingh643@gmail.com
