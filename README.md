@@ -81,4 +81,4 @@ Access the frontend at `http://localhost:3000` and the API at `http://localhost:
 
 ## 📄 License & Contact
 - **License:** MIT License  
-- **Contact:** [Your Name](https://github.com/your-handle) · your.email@example.com
+- **Contact:** bhat0155@algonquinlive.com
