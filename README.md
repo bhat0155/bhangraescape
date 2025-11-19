@@ -1,8 +1,7 @@
 # Bhangraescape
 
 ## 🌟 Overview
-**Title:** Bhangraescape
-**Description:** A modern full-stack application that lets members explore events, manage teams, and collaborate through a seamless experience spanning a fast Next.js interface and a secure Express.js API backed by PostgreSQL.  
+A modern full-stack application that lets members explore events, manage teams, and collaborate through a seamless experience spanning a fast Next.js interface and a secure Express.js API backed by PostgreSQL.  
 **Tech Stack:**
 - Next.js (React) for the web client
 - Express.js (Node.js) for the REST API
