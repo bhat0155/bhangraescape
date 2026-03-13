@@ -14,6 +14,7 @@ import { playlistRouter } from './Routes/playlist.routes';
 import {finalMixRouter} from './Routes/finalmix.route';
 import { bearerAuth } from './middlewares/bearAuth';
 import adminRouter from './Routes/admin.route';
+import { prisma } from './lib/prisma';
 
 const devOrigin = process.env.NEXT_DEV_ORIGIN ?? 'http://localhost:3000';
 
@@ -53,8 +54,14 @@ app.use("/api/admin", adminRouter)
 app.use(errorHandler);
 
 // creating a health route
-app.get("/health", (req: Request, res:Response)=>{
-    res.json({ok: true})
+app.get("/health", async (_req: Request, res: Response) => {
+    try {
+        await prisma.$queryRaw`SELECT 1`;
+        res.json({ ok: true });
+    } catch (error) {
+        console.error("Health check failed:", error);
+        res.status(503).json({ ok: false });
+    }
 })
 
 const PORT = process.env.PORT || 4000;
