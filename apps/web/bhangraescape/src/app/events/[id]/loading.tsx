@@ -1,7 +1,9 @@
 export default function LoadingEvent(){
-    <div>
+    return (
+        <div>
         <p>
             Loading the Event ...
         </p>
     </div>
+    )
 }
