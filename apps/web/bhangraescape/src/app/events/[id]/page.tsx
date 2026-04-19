@@ -41,16 +41,27 @@ export default async function EventDetailPage({
     null;
   const authHeader = token ? { Authorization: `Bearer ${token}` } : undefined;
 
-    // 🛑 START OF MODIFIED BLOCK 🛑
     let data: any = null;
+    let mediaItems: MediaItem[] = [];
 
     try {
-        const res = await fetch(`${base}/events/${eventId}`, {
-            cache: "no-store",
-            headers: authHeader,
-        });
+        const [res, mediaRes] = await Promise.all([
+            fetch(`${base}/events/${eventId}`, {
+                cache: "no-store",
+                headers: authHeader,
+            }),
+            fetch(`${base}/uploads/${eventId}/media`, {
+                cache: "no-store",
+                headers: authHeader,
+            })
+        ]);
 
         const text = await res.text(); // Read as text first for inspection
+          if(!mediaRes.ok){
+    throw new Error(`Failed to fetch media ${mediaRes.status} ${mediaRes.statusText}`)
+
+  }
+
 
         if (res.status === 404) {
             notFound();
@@ -63,29 +74,23 @@ export default async function EventDetailPage({
         }
         
         data = JSON.parse(text); // Parse only if successful
+         const mediaJson = await mediaRes.json();
+  mediaItems = (mediaJson.items || []) as MediaItem[];                             
 
     } catch(err) {
         // This catches both network errors and the explicit throw new Error(...) above
         console.error(`[PAGE COMPONENT ERROR] Failed to process event ${eventId}:`, err);
         throw err; // Re-throw the error to trigger Next.js error page
     }
-    // 🛑 END OF MODIFIED BLOCK 🛑
+         
 
   const event = data.event as EventDetail;
-  
-  // Fetching media for the event
-  const mediaRes = await fetch(`${base}/uploads/${eventId}/media`, {
-    cache: "no-store",
-    headers: authHeader,
-  });
-  if(!mediaRes.ok){
-    throw new Error(`Failed to fetch media ${mediaRes.status} ${mediaRes.statusText}`)
-  }
-  const mediaJson = await mediaRes.json();
-  const mediaItems = (mediaJson.items || []) as MediaItem[]
+
 
   const finalTitle = data.event.finalPlaylistTitle ?? null;
   const finalUrl   = data.event.finalPlaylistUrl ?? null;
+
+
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
