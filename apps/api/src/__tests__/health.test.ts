@@ -16,7 +16,7 @@ import { app } from '../app';
   describe("GET /health", () => {
     it("returns ok: true when the DB check succeeds", async () => {
       const res = await request(app).get("/health");
-      expect(res.status).toBe(201);
+      expect(res.status).toBe(200);
       expect(res.body).toEqual({ ok: true });
     });
   });
