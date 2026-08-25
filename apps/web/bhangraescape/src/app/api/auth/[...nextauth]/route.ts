@@ -38,7 +38,7 @@ export const { handlers: { GET, POST }, auth } = NextAuth({
   },
   async session({ session, token }) {
     if (session.user) {
-      (session.user as any).role = token.role ?? "GUEST";
+      session.user.role = token.role ?? "GUEST";
     }
     return session;
   },

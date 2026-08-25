@@ -18,7 +18,7 @@ export default async function MemberDetailPage({params}: {params: {id: string}})
     const member = (await res.json()) as Member;
 
     const session = await auth();
-    const role = ((session?.user as any)?.role ?? "GUEST") as "GUEST" | "MEMBER" | "ADMIN";
+    const role = session?.user?.role ?? "GUEST";
 
 
     return (

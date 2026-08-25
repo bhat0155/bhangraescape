@@ -26,8 +26,8 @@ export default function PromoteToAdmin({
       });
       if (!res.ok) throw new Error("Issues promoting to admin on API side");
       router.refresh();
-    } catch (err: any) {
-      setError(`Cannot promote member to admin: ${err.message}`);
+    } catch (err) {
+      setError(`Cannot promote member to admin: ${err instanceof Error ? err.message : "unknown error"}`);
     } finally {
       setSaving(false);
     }

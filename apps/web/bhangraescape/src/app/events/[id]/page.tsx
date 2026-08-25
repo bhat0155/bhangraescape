@@ -1,4 +1,5 @@
-import { EventDetail } from "@/app/types/events";
+import { EventDetail, Weekday } from "@/app/types/events";
+import type { Performer } from "@/app/components/Performers";
 import { formatDate } from "@/app/lib/format";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -31,7 +32,7 @@ export default async function EventDetailPage({
 
   // user info
   const session = await auth();
-  const role = (session?.user as any)?.role ?? "GUEST";
+  const role = session?.user?.role ?? "GUEST";
   const isAdmin = role === "ADMIN"
   // read jwt from cookies and then pass it to express
   const cookieStore = cookies();
@@ -41,7 +42,17 @@ export default async function EventDetailPage({
     null;
   const authHeader = token ? { Authorization: `Bearer ${token}` } : undefined;
 
-    let data: any = null;
+    type EventDetailResponse = {
+        event: EventDetail;
+        capabilities: { canSetInterest: boolean; canSetAvailability: boolean };
+        performers: Performer[];
+        interested: boolean;
+        myDays: Weekday[];
+        tallies: Record<Weekday, number>;
+        topDays: Array<{ weekday: Weekday; count: number }>;
+    };
+
+    let data: EventDetailResponse | null = null;
     let mediaItems: MediaItem[] = [];
 
     try {
@@ -82,7 +93,10 @@ export default async function EventDetailPage({
         console.error(`[PAGE COMPONENT ERROR] Failed to process event ${eventId}:`, err);
         throw err; // Re-throw the error to trigger Next.js error page
     }
-         
+
+    if (!data) {
+        throw new Error(`Failed to load event ${eventId}`);
+    }
 
   const event = data.event as EventDetail;
 

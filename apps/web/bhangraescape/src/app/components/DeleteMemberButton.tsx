@@ -22,8 +22,8 @@ export default function DeleteMemberButton({ memberId }: { memberId: string }) {
       router.push("/members");
       // Optional: ensure fresh list if the page keeps cache
       router.refresh();
-    } catch (e: any) {
-      setErr(e?.message ?? "Failed to delete member.");
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Failed to delete member.");
     } finally {
       setDeleting(false);
     }

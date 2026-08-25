@@ -69,8 +69,8 @@ export default function ContactUsForm() {
 
       setSuccess("Thanks! Your message was sent to the team.");
       setTimeout(() => setSuccess(null), 3000);
-    } catch (err: any) {
-      setError(err?.message || "Could not send the message.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send the message.");
     } finally {
       setSending(false);
     }

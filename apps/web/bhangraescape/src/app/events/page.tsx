@@ -47,7 +47,7 @@ export default async function EventsPage({
 
     // role
     const session = await auth();
-    const role = (session?.user as any)?.role ?? "GUEST"
+    const role = session?.user?.role ?? "GUEST"
 
     // fetch from backend
     try{

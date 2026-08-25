@@ -65,8 +65,8 @@ export default function FinalMixEditor({
       }
       setOpen(false);
       router.refresh();
-    } catch (e: any) {
-      setErr(e?.message ?? "Failed to save final mix.");
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Failed to save final mix.");
     } finally {
       setSaving(false);
     }

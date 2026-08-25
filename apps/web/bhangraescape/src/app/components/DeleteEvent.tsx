@@ -31,8 +31,8 @@ export default function DeleteEvent({
 
       router.push("/events");
       router.refresh();
-    } catch (err: any) {
-      setError(err.message || "Failed to delete event");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete event");
     } finally {
       setDeleting(false);
     }
